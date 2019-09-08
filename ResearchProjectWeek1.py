@@ -6,27 +6,79 @@ Created on Fri Sep  6 22:31:11 2019
 @author: RachelCampo
 """
 
-#I am going to attempt to try and code a program to analyze my data
-#without my data..... Here we go
-
-import math
-import fileinput
 import numpy as np
 import scipy as sp
-import scipy.interpolate
+from astropy.io import fits
 import matplotlib.pyplot as plt
 
-from scipy.integrate import quad
-from scipy.misc import derivative
-from scipy.integrate import odeint
-from matplotlib import rcParams
 
 #this code is going to be the part where it runs through my data and figures
-#out what the wavelength is after the redshift, uses the dopler shift to find
+#out what the wavelength is after the redshift, uses the doppler shift to find
 #what the wavelength was before the redshift, and then determines what 
 #part of the spectrum is was from.
 
- #wavelength = something from the data
+#spec_data_array =
+#spec_data_list =
 
-for x in datalist:
+wavelength = specdatalist[1].data['loglam']
+redshift = specdatalist[1].data['Z']
+
+wave_list = np.array([])
+result_list = np.array([])
+
+radio_list = ['Radio']
+micro_list = ['Microwave']
+infra_list = ['Infrared']
+visi_list = ['Visible']
+ultra_list = ['Ultraviolet']
+xray_list = ['X-Ray']
+gamma_list = ['Gamma Ray']
+error_list = ['Error. Wavelength not found in EM spectrum.']
+
+
+for x in wavelength:
+    ds_eq = (10**wavelength) / (1 + redshift)
+    originwav = ds_eq[0]
+    wave_list = np.concatenate([wave_list, [originwav]])
+
+#above, I took the data array and searched through it and calculated what the 
+#wavelength originally looked like when first emitted by using the Doppler 
+#Shift. Then after getting that result, I put it in a list called wave_list
+
+for x in wave_list:
+        
+    if x > 10**9:
+        #print('Radio')
+        result_list = np.concatenate([result_list, [radio_list]])
+    elif x <= 10**9 and x >= 10**6:
+       # print('Microwave')
+       result_list = np.concatenate([result_list, [micro_list]])
+    elif x <= 10**6 and x >= 7000:
+       # print('Infrared')
+       result_list = np.concatenate([result_list, [infra_list]])
+    elif x <= 7000 and x >= 4000:
+       # print('Visible')
+       result_list = np.concatenate([result_list, [visi_list]])
+    elif x <= 4000 and x >= 10:
+       # print('Ultraviolet')
+       result_list = np.concatenate([result_list, [ultra_list]])
+    elif x <=10 and x >= 0.1:
+       # print('X-Rays')
+       result_list = np.concatenate([result_list, [xray_list]])
+    elif x < 0.1:
+       # print('Gamma Ray')
+       result_list = np.concatenate([result_list, [gamma_list]])
+    else:
+       # print('Error. None of the original wavelengths were found in the EM spectrum')
+       result_list = np.concatenate([result_list, [error_list]])
+       
+#above, I searched through each element in wave_list and looked at it's 
+#wavelength and checked which part of the EM spectrum it was emitted in.
+#then, for each time one of the statements were true, it would add to the list
+#what corresponding wavelength it was in. The units are angstrom here.
+       
+
+print(result_list)
+
+    
     
