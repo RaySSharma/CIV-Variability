@@ -1,0 +1,51 @@
+
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{fullpage} % Package to use full page
+\usepackage{parskip} % Package to tweak paragraph skipping
+\usepackage{tikz} % Package for drawing
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{09-03-19}
+\author{}
+\maketitle
+    \section{Procedure}
+        \begin{itemize}
+            \item Gather SDSS quasar spectra
+            \item Identify spectra with repeat-observations
+            \item Include iron line templates
+            \item Dust correct
+            \item Continuum subtract
+            \item Fit emission line profiles
+            \item Analyze variability of CIV relative to MgII
+            \item Determine effects on black hole masses
+        \end{itemize}
+
+    \section{Gather Spectra}
+        Quasar catalog: \url{https://data.sdss.org/sas/dr14/eboss/qso/DR14Q/DR14Q_v4_4.fits}
+
+        Quasar catalog data model: \url{https://data.sdss.org/datamodel/files/BOSS_QSO/DR14Q/DR14Q_v4_4.html}
+
+        ``Lite" spectra: \url{https://data.sdss.org/sas/dr14/eboss/spectro/redux/v5_10_0/spectra/lite}
+
+        Spectra data model: \url{https://data.sdss.org/datamodel/files/BOSS_SPECTRO_REDUX/RUN2D/spectra/PLATE4/spec.html}
+
+        Gather quasar spectra from the Sloan Digital Sky Survey that meet a few criteria:
+        \begin{itemize}
+            \item Include CIV (\AA 1549) and MgII (\AA 2798) emission lines
+            \item Have good signal-to-noise (start with SN $>$ 2)
+            \item Have good plate quality
+            \item Do not have evidence of quasar Broad Absorption Lines (BALs)
+            \item Are within 1 degree of the plate bore-sight
+        \end{itemize}
+
+        After gathering spectra, figure out which ones have had repeat-observations done of the same quasar.
+
+\end{document}
