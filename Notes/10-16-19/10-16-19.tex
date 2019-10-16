@@ -1,0 +1,66 @@
+
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{fullpage} % Package to use full page
+\usepackage{parskip} % Package to tweak paragraph skipping
+\usepackage{tikz} % Package for drawing
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{10-16-19}
+\author{}
+\maketitle
+    \section{Procedure}
+        \begin{itemize}
+            \item Gather SDSS quasar spectra
+            \item Include iron line templates
+            \item Dust correct
+            \item Continuum subtract
+            \item Fit emission line profiles
+            \item Analyze variability of CIV relative to MgII
+            \item Identify spectra with repeat-observations
+            \item Determine effects on black hole masses
+        \end{itemize}
+
+    \section{How to Continuum Subtract}
+        See $\S3.1$ in \url{https://ui.adsabs.harvard.edu/abs/2016ApJS..224...14D/abstract}
+        and $\S3.3$ in \url{https://ui.adsabs.harvard.edu/abs/2011ApJS..194...45S/abstract}
+
+        We have \textit{continuum} emission below the CIV line that comes from the combined light of the galaxy + AGN.
+        To properly isolate CIV (and MgII) emission and analyze line properties, we have to account for this excess emission.
+
+        When subtracting continuum in this way, we have to be careful to keep track of uncertainties that propagate into our final results.
+        When curve-fitting, the reliability of your fit depends heavily on the errorbars of the data, i.e, if all of your data has high variance, then your fit will be unreliable.
+        Further, data with small errorbars should play into the fit more than data with large errorbars, since data with small errorbars is more reliable.
+        Hence we should weight our fit in such a way that small variances are weighted more highly than large variances.
+        A good rule of thumb is, for each data point $(x_i, y_i)$ we can define a weight such that:
+        \begin{align}
+            w_i \propto \frac{1}{\sigma_i^2},
+        \end{align}
+        where $\sigma_i$ is variance at each data point.
+
+        The continuum subtraction itself should be done separately for MgII and CIV.
+
+        For CIV:
+        \begin{itemize}
+            \item Calculate the mean flux in the regions blue-ward $[1435 - 1465 \AA]$ and red-ward $[1690 - 1710 \AA]$ of the CIV line.
+            \item Gather up the variances associated with each spectral element (check spectrum data model for inverse variance).
+            \item Fit a straight line through these two windows (accounting for variance).
+            \item Subtract the straight line fit from the spectrum.
+        \end{itemize}
+
+        For MgII:
+        \begin{itemize}
+            \item Calculate the mean flux in the regions blue-ward $[2200 - 2700 \AA]$ and red-ward $[2900 - 3090 \AA]$ of the MgII line.
+            \item Gather up the variances associated with each spectral element (check spectrum data model for inverse variance).
+            \item Fit a straight line through these two windows (accounting for variance).
+            \item Subtract the straight line fit from the spectrum.
+        \end{itemize}
+
+\end{document}
