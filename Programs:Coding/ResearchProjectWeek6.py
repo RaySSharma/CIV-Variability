@@ -17,9 +17,10 @@ specdatalist = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Pr
 
 wavelength = specdatalist[1].data['loglam']
 redshift = specdatalist[1].data['Z']
-SN_Ratio = specdatalist[1].data['W1SNR'] #needs to be from platelist
+SN_Ratio = platelist.data['PLATESN2']
 BAL_Indicator = specdatalist[1].data['BI_CIV'] 
 plate_quality = platelist.data['PLATEQUALITY']
+plate_number = specdatalist[1].data['PLATE']
 
 Plate_RA = platelist.data['RACEN']
 Plate_Dec = platelist.data['DECCEN']
@@ -84,9 +85,9 @@ for i, x in enumerate(SN_Ratio):
         success_list = np.concatenate([success_list, [failure]])
 
 
-for i, x in enumerate(plate_quality):
-    condition = x
-    if x == 'good':
+for i, x in enumerate(plate_number):
+    condition = plate_quality
+    if plate_quality == 'good':
         success = i
         data_list = np.concatenate([data_list, [success]])
     else:
