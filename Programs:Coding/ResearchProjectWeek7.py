@@ -37,14 +37,18 @@ ra_list = np.array([])
 
 for x, y in enumerate(plate_number):
     ix = plate == plate_number[x]
-    plateRA = Plate_RA[ix]
-    ra_list = np.concatenate([ra_list, [plateRA]])
+    RADiff = abs(RA[y] - Plate_RA[ix])
+    ra_list = np.concatenate([ra_list, RADiff])
     
+#when running RADiff, what we noticed is that some of the elements were empty
+#and this could be due to possibly a quasar not having a plate number that is 
+#in the platelist file. This problem may crop up later on, so make sure to keep
+#an eye out for this.
    
 for x, y in enumerate(plate_number):
     ix = plate == plate_number[x]
-    plateDec = Plate_Dec[ix]
-    dec_list = np.concatenate([dec_list, [plateDec]])
+    DecDiff = abs(Dec[y] - Plate_Dec[ix])
+    dec_list = np.concatenate([dec_list, DecDiff])
 
   
 for i, x in enumerate(dec_list):
@@ -117,3 +121,5 @@ for x in success_list:
     else:
         failure = x
         null_list = np.concatenate([null_list, [failure]])
+        
+#If we want to add more conditions later, make sure to update the code accordingly!
