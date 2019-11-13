@@ -26,18 +26,18 @@ RA = specdatalist[1].data['RA']
 Dec = specdatalist[1].data['DEC']
 
 
-success_list = np.array([])
-data_list = np.array([])
-null_list = np.array([])
+success_list = []
+data_list = []
+null_list = []
 
-dec_list = np.array([])
-ra_list = np.array([])
+dec_list = []
+ra_list = []
 
 
 for x, y in enumerate(plate_number):
     ix = plate == plate_number[x]
     RADiff = abs(RA[y] - Plate_RA[ix])
-    ra_list = np.concatenate([ra_list, RADiff])
+    ra_list.append(RADiff)
     
 #when running RADiff, what we noticed is that some of the elements were empty
 #and this could be due to possibly a quasar not having a plate number that is 
@@ -47,26 +47,26 @@ for x, y in enumerate(plate_number):
 for x, y in enumerate(plate_number):
     ix = plate == plate_number[x]
     DecDiff = abs(Dec[y] - Plate_Dec[ix])
-    dec_list = np.concatenate([dec_list, DecDiff])
+    dec_list.append(DecDiff)
 
   
 for i, x in enumerate(dec_list):
     condition = x
-    if x > 1:
+    if x.any() > 1:
         failure = i
-        null_list = np.concatenate([null_list , [failure]])
+        null_list.append(failure)
     else:
         success = i
-        success_list = np.concatenate([success_list, [success]])
+        success_list.append(success)
         
 for i, x in enumerate(ra_list):
     condition = x
-    if x > 1:
+    if x.any() > 1:
         failure = i
-        null_list = np.concatenate([null_list, [failure]])
+        null_list.append(failure)
     else:
         success = i
-        success_list = np.concatenate([success_list, [success]])
+        success_list.append(success)
 
 
 for i, x in enumerate(plate_number):
@@ -75,10 +75,10 @@ for i, x in enumerate(plate_number):
     if len(SN) == 1:
         if x >= 2:
             success = i
-            success_list = np.concatenate([success_list, [success]])
+            success_list.append(success)
         else:
             failure = i
-            null_list = np.concatenate([null_list, [failure]])
+            null_list.append(failure)
 
 
 for i, x in enumerate(plate_number):
@@ -87,38 +87,42 @@ for i, x in enumerate(plate_number):
     if len(quality) == 1:
         if quality[0] == 'good':
             success = i
-            success_list = np.concatenate([success_list, [success]])
+            success_list.append(success)
         else:
             failure = i
-            null_list = np.concatenate([null_list, [failure]])
+            null_list.append(failure)
 
 
 for i, x in enumerate(BAL_Indicator):
     condition = x
     if x > 0:
         failure = i
-        null_list = np.concatenate([null_list, [failure]])
+        null_list.append(failure)
     else:
         success = i
-        success_list = np.concatenate([success_list, [success]])
+        success_list.append(success)
         
 
 for i, x in enumerate(redshift):
     condition = x
     if x > 1.7 and x < 2.6:
         success = i
-        success_list = np.concatenate([success_list, [success]])
+        success_list.append(success)
     else:
         failure = i
-        null_list = np.concatenate([null_list, [failure]])
+        null_list.append(failure)
         
 
 nums, counts = np.unique(success_list, return_counts = True)
 
 for nums, count in zip(nums, counts):
     if count == 6:
-        data_list = np.concatenate([data_list, [nums]])
+        data_list.append(nums)
 
     
-        
+print(len(data_list))      
 #If we want to add more conditions later, make sure to update the code accordingly!
+        
+#change the arrays to lists, it will make the runtime a lot faster
+#also, we don't need the failure list anymore, we can just focus on the success lists
+
