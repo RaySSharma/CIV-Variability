@@ -1,0 +1,59 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{fullpage} % Package to use full page
+\usepackage{parskip} % Package to tweak paragraph skipping
+\usepackage{tikz} % Package for drawing
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{01-03-20}
+\author{}
+\maketitle
+
+\section{Continuum Fitting Addendum}
+In order to fit the continuum, we should fit a straight line through the fitting windows \textbf{in log-log space}. This is equivalent to fitting a power law in linear space. 
+
+If we start with a power law in linear space:
+\begin{align*}
+    y = A x^m,
+\end{align*}
+then
+\begin{align*}
+    \log y = m \log x + \log A,
+\end{align*}
+so 
+\begin{align*}
+    \log y = m \log x + B,
+\end{align*}
+which is a straight line in log-log space.
+
+It turns out the iron template fitting is easier in linear space, so we'll need to use something other than numpy.polyfit to do the power-law fitting. The best alternative is probably scipy.optimize.curve\_fit.
+\section{Continuum + Iron Fitting}
+    Instead of doing just continuum subtraction, we will fit the underlying continuum and iron emission at the same time, then subtract both from the spectrum.
+
+    Before fitting:
+    \begin{itemize}
+        \item Interpolate the iron template.
+        \item Code a basic function for a Gaussian function, $g(x, \mu, \sigma)$, where $\mu$ will be the center of the iron emission, and $\sigma$ will be the $\sigma_{conv}$ from the paper.
+        \item Code a 3-parameter function that returns the convolution of the Gaussian broadening function and the $\log$-spaced template, $f(\lambda) \star g(\lambda, \mu, \sigma)$
+    \end{itemize}
+
+    Now the fitting (CIV for example):
+    \begin{itemize}
+        \item "Rebin" your data into log-spacing.
+        \item Gather the flux values in the regions blue-ward [1435 - 1465\AA] and red-ward [1690 - 1710\AA] of the CIV line.
+        \item Fit a line of the following form:
+    \end{itemize}
+    \begin{align*}
+        F_{cont+iron}(A, k, B, \mu, \sigma) = A \lambda^k + B F_{iron}(\lambda, \mu, \sigma)
+    \end{align*}
+    \begin{itemize}
+        \item Subtract this new fit from the spectrum.
+    \end{itemize}
+\end{document}
