@@ -1,0 +1,44 @@
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{fullpage} % Package to use full page
+\usepackage{parskip} % Package to tweak paragraph skipping
+\usepackage{tikz} % Package for drawing
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\begin{document}
+
+\title{01-03-20}
+\author{}
+\maketitle
+
+\section{Dust Corrections}
+To correct for dust, we need an understanding of:
+\begin{itemize}
+    \item Where dust is
+    \item What the dust is made of
+    \item How much dust there is
+\end{itemize}
+
+A dust map like Schlegel+(1998) will give you a quantity $E(B-V)$ at the RA and dec that you input, where
+\begin{align}
+    E(B-V) = (B - V)_{\text{observed}} - (B - V)_{\text{intrinsic}}.
+\end{align}
+In other words, the observed $(B-V)$ color of a source will be reddened by some value $E(B-V)$, which is a function of how much dust is along the line of sight.
+
+If we want to adjust an entire spectrum, we can make use of the total extinction (which is strongly related to the chemical composition of the dust)
+\begin{align}
+    A_\lambda = -2.5 \log \frac{F_\lambda}{F_{\lambda,0}}
+\end{align}
+where $F_{\lambda}$ is the extincted flux at some wavelength, and $F_{\lambda,0}$ is the unextincted flux at that wavelength.
+
+The connection between the total extinction and the reddening is given as:
+\begin{align}
+    R = \frac{A_V}{E(B-V)},
+\end{align}
+where $R = 3.1$ is the Cardelli+(1989) extinction law found for the dust composition in the Milky Way.
+\end{document}
