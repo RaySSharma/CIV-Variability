@@ -11,7 +11,6 @@ Created on Wed Jan  1 20:34:48 2020
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
-import scipy as sp
 import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline as IUS
 from scipy.optimize import curve_fit
@@ -27,7 +26,7 @@ FE_Template = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/C
 #properties from quasar
 wavelength = test_data[1].data['loglam']
 redshift = test_data[2].data['Z']
-flux_rf = test_data[1].data['flux'] / (1 + redshift)
+flux_rf = test_data[1].data['flux'] / (1 + redshift) #no need to worry about rf the flux
 wavelength_rf = (10**wavelength) / (1 + redshift)
 ivar = test_data[1].data['ivar']
 sigma = 1 / np.sqrt(abs(ivar))
@@ -36,7 +35,6 @@ sigma = 1 / np.sqrt(abs(ivar))
 FE_wavelength = FE_Template['wavelength'].values
 FE_flux = FE_Template['flux'].values
 
-#plt.plot(FE_wavelength, FE_flux, 'g')
 
 #the three parameters for the widening of the iron plate
 def gauss(x, m, sigma):
@@ -54,19 +52,23 @@ log_FE_wavelength, log_FE_spline = rebin_log(FE_wavelength, FE_flux)
 def fit_func(wavelength_rf, A, k, B, mu, sigma):
     FE_convolution = np.convolve(log_FE_spline(wavelength_rf), gauss(wavelength_rf, mu, sigma), mode = 'same')
     return (A * wavelength_rf**k) + (10**B * FE_convolution)
+#the fit_func is fitting both the continuum AND the FE plate! That's why we are adding
+    #both the Alambda^K and the FE.
 
 cutoffs = ((wavelength_rf > 1435)&(wavelength_rf < 1465)) | ((wavelength_rf > 1690)&(wavelength_rf < 1710))
-boundaries = [[0, -10, 0, 10, 10], [100, 10, 50, 10000, 10000]]
+boundaries = [[0, -10, 0, 1000, 10], [100, 10, 20, 2000, 10000]]
 p0 = [10, -2, 13, 1000, 1000]
 log_wavelength, log_flux = rebin_log(wavelength_rf[cutoffs], flux_rf[cutoffs])
 pf, covariances = curve_fit(fit_func, log_wavelength, log_flux(log_wavelength), sigma = sigma[cutoffs], bounds = boundaries, p0 = p0)
 
-C4_cutoffs = (wavelength_rf > 1465) & (wavelength_rf < 1710)
-continuum_flux = fit_func(wavelength_rf[C4_cutoffs], 10, -2, 13, 1000, 1000)
+
+C4_cutoffs = (log_wavelength > 1465) & (log_wavelength < 1710) # did not use the pf variables, possible reason
+# why it was not subtracted off correctly.
+continuum_flux = fit_func(log_wavelength[C4_cutoffs], *pf) #put *pf in for the numbers
 
 plt.plot(wavelength_rf[C4_cutoffs], flux_rf[C4_cutoffs], label = 'Original')
 plt.plot(wavelength_rf[C4_cutoffs], continuum_flux, label = 'Continuum + Iron')
 plt.plot(wavelength_rf[C4_cutoffs], flux_rf[C4_cutoffs] - continuum_flux, label = 'Subtracted Continuum')
-plt.legend()
+plt.legend(loc = 'best')
 
 
