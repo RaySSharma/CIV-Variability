@@ -9,8 +9,8 @@ Created on Wed Nov 27 12:50:06 2019
 import numpy as np
 from astropy.io import fits
 
-platelist = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/platelist.fits')
-specdatalist = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/DR14Q_v4_4.fits')
+platelist = fits.open('/data2/rlc186/QuasarData/CIV-Variability/Programs:Coding/platelist.fits')
+specdatalist = fits.open('/data2/rlc186/QuasarData/CIV-Variability/Programs:Coding/DR14Q_v4_4.fits')
 
 
 redshift = specdatalist[1].data['Z']
@@ -119,7 +119,7 @@ for nums, count in zip(nums, counts):
     if count == 6:
         data_list.append(nums)
     
-print(len(data_list))
+#print(len(data_list))
 
 ## Here is the data download section for this code ##
 
@@ -130,7 +130,7 @@ spectra_output_dir = '/data2/rlc186/QuasarData/'  # Directory to download spectr
 spectra_url_root = 'https://data.sdss.org/sas/dr14/eboss/spectro/redux/v5_10_0/spectra/lite/'  # Spectra directory URL
 
 quasar_list = data_list  # List of quasar indices
-quasar_catalog = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/DR14Q_v4_4.fits')  # Quasar catalog file
+quasar_catalog = fits.open('/data2/rlc186/QuasarData/CIV-Variability/Programs:Coding/DR14Q_v4_4.fits')  # Quasar catalog file
 
 quasar_plate = quasar_catalog[1].data['PLATE']  # Quasar catalog plates
 quasar_fiber = quasar_catalog[1].data['FIBERID']  # Quasar catalog fibers
