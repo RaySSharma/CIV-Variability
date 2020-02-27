@@ -22,12 +22,14 @@ test_quasar = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/
 #Plate_RA = platelist[1].data['RACEN']
 #Plate_Dec = platelist[1].data['DECCEN']
 #plate = platelist[1].data['PLATE']
-RA = test_quasar[0].data['PLUG_RA']
-Dec = test_quasar[0].data['PLUG_DEC']
+RA = test_quasar[2].data['PLUG_RA']
+Dec = test_quasar[2].data['PLUG_DEC']
 wavelength = test_quasar[1].data['loglam']
-flux = test_quasar[1].data['FLUX']
+flux = test_quasar[1].data['flux']
 
-coordinates = SC('RA', 'Dec', frame = 'icrs')
+
+coordinates = SC(RA, Dec, frame = 'icrs')
+
 sfd = SFDQuery()
 ebv = sfd(coordinates)
 R_v = 3.1
