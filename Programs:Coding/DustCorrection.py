@@ -6,7 +6,6 @@ Created on Thu Feb 13 11:28:37 2020
 @author: RachelCampo
 """
 
-import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from dustmaps.sfd import SFDQuery
@@ -28,18 +27,18 @@ wavelength = test_quasar[1].data['loglam']
 flux = test_quasar[1].data['flux']
 
 
-coordinates = SC(RA, Dec, frame = 'icrs')
+coordinates = SC(RA, Dec, frame = 'icrs', unit = u.deg)
 
 sfd = SFDQuery()
 ebv = sfd(coordinates)
 R_v = 3.1
 
-print('EVB for test quasar:'.format(ebv))
+#print('EVB for test quasar:'.format(ebv))
 
-ext = F99(R_v = R_v)
+ext = F99(R_v)
 
 plt.semilogy(wavelength, flux, 'b', label = "Test Quasar's Emission")
-plt.semilogy(wavelength, flux/ext.extinguish(wavelength, ebv = ebv), 'r', label = 'Dereddened Quasar Emission')
+plt.semilogy(wavelength, flux/ext.extinguish(wavelength, ebv), 'r', label = 'Dereddened Quasar Emission')
 plt.xlabel('Wavelength (Angstrom)')
 plt.ylabel('Flux (ergs/cm^2/s)')
 plt.title('Dereddened Emission')
