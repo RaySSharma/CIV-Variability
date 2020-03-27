@@ -54,11 +54,11 @@ def gauss(x, m, sig):
 
 def rebin_log(x, y):
     log_x = np.log10(x)
-    new_x = np.logspace(log_x[1], log_x[-1], len(x))
+    new_x = np.logspace(log_x[1], log_x[-2], len(x))
     return new_x, interp1d(x, y)
 
 def rebin_lin(x, y):
-    x_new = np.linspace(x[1], x[-1], len(x))
+    x_new = np.linspace(x[1], x[-2], len(x))
     return x_new, interp1d(x, y)
 
 log_FE_wavelength, log_FE_spline = rebin_log(FE_wavelength, FE_flux)
@@ -71,8 +71,9 @@ def fit_func(lam, A, k, B, m, sigma):
 #the fit_func is fitting both the continuum AND the FE plate! That's why we are adding
     #both the Alambda^K and the FE.
 
-boundaries = [[0, -2, 10, 1500, 0], [100, 2, 20, 1600, 10000]]
+boundaries = [[0.1, -2, 10, 1500, 905], [1e3, 2, 20, 1600, 10000]]
 p0 = [10, 0, 14, 1550, 1000]
+
 log_wavelength, log_flux = rebin_log(C4_wavelength, C4_flux)
 ix = ((log_wavelength > 1435)&(log_wavelength < 1465)) | ((log_wavelength > 1690)&(log_wavelength < 1710))
 pf, covariances = curve_fit(fit_func, log_wavelength[ix], log_flux(log_wavelength[ix]), sigma = sigma[ix], bounds = boundaries, p0 = p0)
