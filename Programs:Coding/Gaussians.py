@@ -50,7 +50,7 @@ def gaussian3(x, m1, sigma1, k1, m2, sigma2, k2, m3, sigma3, k3):
 MgII_conditions = (1000, 2798, sig) #this is for the MgII line
 gauss_fit, pcov = curve_fit(gaussian, MgII_lam, MgII_flux, p0 = MgII_conditions)
 
-CIV_conditions = (1549, sig_C4, 1000, 2549, sig_C4 / 2, 500, 3549, 2 * sig_C4, 2000)
+CIV_conditions = (1549, sig_C4, 1000, 1549, sig_C4 / 900, 1000, 1549, sig_C4, 1000)
 C4_gauss_fit, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_conditions)
 
 plt.figure()
