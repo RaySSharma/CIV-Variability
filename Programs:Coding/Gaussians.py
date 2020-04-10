@@ -36,7 +36,8 @@ def gaussian(x, k, m, sigma):
     return g
 
 def gaussian3(x, m, sigma1, k1, sigma2, k2, sigma3, k3):
-    gauss = (k1 * np.exp(-.5 * ((x - m) / sigma1)**2)) + (k2 * np.exp(-.5 * ((x - m) / sigma2)**2)) + (k3 * np.exp(-.5 * ((x - m) / sigma3)**2))
+    gauss = gaussian(x, k1, m, sigma1) + gaussian(x, k2, m, sigma2) + gaussian(x, k2, m, sigma2)
+    #gauss = (k1 * np.exp(-.5 * ((x - m) / sigma1)**2)) + (k2 * np.exp(-.5 * ((x - m) / sigma2)**2)) + (k3 * np.exp(-.5 * ((x - m) / sigma3)**2))
     return gauss
 
 # m (mu) is the mean expectation (can be mode or median too)
