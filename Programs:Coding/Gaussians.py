@@ -22,14 +22,14 @@ MgII_bounds = (lam > 2700) & (lam < 2900)
 MgII_flux = flux[MgII_bounds]
 MgII_lam = lam[MgII_bounds]
 MgII_ivar = ivar[MgII_bounds]
-sig = 1200 / 2.35482 #A/s,
+sig = 1200 / 2.35482 #km/s,
 
 #C4 properties
 C4_bounds = (lam > 1500) & (lam < 1600)
 C4_flux = flux[C4_bounds]
 C4_lam = lam[C4_bounds]
 C4_ivar = ivar[C4_bounds]
-sig_C4 = 245000 / 2.35482 #A/s, adjust these to wavelength (Angstroms)
+sig_C4 = 245000 / 2.35482 #km/s, adjust these to wavelength (Angstroms)
 
 def gaussian(x, k, m, sigma):
     g = k * np.exp(-.5 * ((x - m) / sigma)**2)
@@ -52,7 +52,7 @@ CIV_condition1 = (1549, sig_C4 / 5000, 100, sig_C4, 0, sig_C4, 0)
 C4_gauss_fit1, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition1)
 CIV_condition2 = (1549, sig_C4, 0, sig_C4 / 50000 , 100, sig_C4, 0)
 C4_gauss_fit2, pcov3 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition2)
-CIV_condition3 = (1549, sig_C4, 0, sig_C4, 0, sig_C4 / 10000, 1000)
+CIV_condition3 = (1549, sig_C4, 0, sig_C4, 0, sig_C4 / 10000, 100)
 C4_gauss_fit3, pcov4 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition3)
 
 plt.figure()
