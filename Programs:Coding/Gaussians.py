@@ -22,38 +22,34 @@ MgII_bounds = (lam > 2700) & (lam < 2900)
 MgII_flux = flux[MgII_bounds]
 MgII_lam = lam[MgII_bounds]
 MgII_ivar = ivar[MgII_bounds]
-sig = 1200 / 2.35482 #km/s,
+sig = (1.2 * 10**16 * 2790) / (3 * 10**18) #A
 
 #C4 properties
 C4_bounds = (lam > 1500) & (lam < 1600)
 C4_flux = flux[C4_bounds]
 C4_lam = lam[C4_bounds]
 C4_ivar = ivar[C4_bounds]
-sig_C4 = 245000 / 2.35482 #km/s, adjust these to wavelength (Angstroms)
+sig_C4 = (24500 * 10**17 * 1549) / (3 * 10**18) #A
 
 def gaussian(x, k, m, sigma):
+    #sigma = 1200 * 
     g = k * np.exp(-.5 * ((x - m) / sigma)**2)
     return g
 
-def gaussian3(x, m, sigma1, k1, sigma2, k2, sigma3, k3):
-    gauss = gaussian(x, k1, m, sigma1) + gaussian(x, k2, m, sigma2) + gaussian(x, k2, m, sigma2)
-    #gauss = (k1 * np.exp(-.5 * ((x - m) / sigma1)**2)) + (k2 * np.exp(-.5 * ((x - m) / sigma2)**2)) + (k3 * np.exp(-.5 * ((x - m) / sigma3)**2))
+def gaussian3(x, m, sigma1, sigma2, sigma3, k1, k2, k3):
+    gauss = gaussian(x, k1, m, sigma1) + gaussian(x, k2, m, sigma2) + gaussian(x, k3, m, sigma3)
     return gauss
-
-# m (mu) is the mean expectation (can be mode or median too)
-# sigma is the standard deviation, and you can find it from FWHM
-# x is the position of where you are
     
 # in the Shein2011 paper, they found that for MgII, the FWHM is 1200 km s^-1
 
 MgII_conditions = (1000, 2798, sig) #this is for the MgII line
 gauss_fit, pcov = curve_fit(gaussian, MgII_lam, MgII_flux, p0 = MgII_conditions)
 
-CIV_condition1 = (1549, sig_C4 / 5000, 100, sig_C4, 0, sig_C4, 0)
+CIV_condition1 = (1549, sig_C4/10, sig_C4/100, sig_C4/10000, 100, 100, 100)
 C4_gauss_fit1, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition1)
-CIV_condition2 = (1549, sig_C4, 0, sig_C4 / 50000 , 100, sig_C4, 0)
+CIV_condition2 = (1549, sig_C4/10000, sig_C4/1000, sig_C4/10, 100, 100, 100)
 C4_gauss_fit2, pcov3 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition2)
-CIV_condition3 = (1549, sig_C4, 0, sig_C4, 0, sig_C4 / 10000, 100)
+CIV_condition3 = (1549, sig_C4/100, sig_C4/1000, sig_C4/500, 100, 100, 100)
 C4_gauss_fit3, pcov4 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition3)
 
 plt.figure()
@@ -68,24 +64,8 @@ plt.ylim(-2, 2)
 
 plt.figure()
 plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit1), 'k', label = 'Gaussian Curve 1')
-plt.plot(lam, flux, 'y')
-plt.legend(loc = 'best')
-plt.title('CIV Gaussian Fit')
-plt.xlabel('Wavelength (Angstrom)')
-plt.ylabel('Flux')
-plt.xlim(1400, 1700)
-plt.ylim(-0.5, 3)
-
-plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit2), 'm', label = 'Gaussian Curve 2')
-plt.plot(lam, flux, 'y')
-plt.legend(loc = 'best')
-plt.title('CIV Gaussian Fit')
-plt.xlabel('Wavelength (Angstrom)')
-plt.ylabel('Flux')
-plt.xlim(1400, 1700)
-plt.ylim(-0.5, 3)
-
-plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit3), 'c', label = 'Gaussian Curve 3')
+plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit2), 'b', label = 'Gaussian Curve 2')
+plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit3), 'm', label = 'Gaussian Curve 3')
 plt.plot(lam, flux, 'y', label = 'Continuum')
 plt.legend(loc = 'best')
 plt.title('CIV Gaussian Fit')
@@ -94,9 +74,6 @@ plt.ylabel('Flux')
 plt.xlim(1400, 1700)
 plt.ylim(-0.5, 3)
 
-
-# Change the sigma to delta(lambda), this will probably change the different 
-# heights of the curves. 
 # put bounds on k: 0 - 1000
 # put bounds on sigma: depending on C4 or MgII, MgII: 5000 km/s, C4: 15000 as 
 # upper bounds. Remember all of these must be positive
