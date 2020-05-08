@@ -9,7 +9,7 @@ Created on Tue Nov  5 18:52:52 2019
 import numpy as np
 from astropy.io import fits
 
-platelist = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/platelist.fits')
+platelist = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/plates-dr16.fits')
 specdatalist = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/DR14Q_v4_4.fits')
 
 
@@ -36,7 +36,7 @@ ra_list = []
 
 for x, y in enumerate(plate_number):
     ix = plate == plate_number[x]
-    RADiff = abs(RA[y] - Plate_RA[ix])
+    RADiff = abs(RA[x] - Plate_RA[ix])
     ra_list.append(RADiff)
     
 #when running RADiff, what we noticed is that some of the elements were empty
@@ -52,7 +52,7 @@ for x, y in enumerate(plate_number):
   
 for i, x in enumerate(dec_list):
     condition = x
-    if x.any() > 1:
+    if any(x > 1):
         failure = i
         null_list.append(failure)
     else:
@@ -61,7 +61,7 @@ for i, x in enumerate(dec_list):
         
 for i, x in enumerate(ra_list):
     condition = x
-    if x.any() > 1:
+    if any(x > 1):
         failure = i
         null_list.append(failure)
     else:
@@ -73,7 +73,7 @@ for i, x in enumerate(plate_number):
     ix = plate == plate_number[i]
     SN = SN_Ratio[ix]
     if len(SN) == 1:
-        if x >= 2:
+        if SN >= 2:
             success = i
             success_list.append(success)
         else:
@@ -119,10 +119,5 @@ for nums, count in zip(nums, counts):
     if count == 6:
         data_list.append(nums)
 
-    
-print(len(data_list))      
-#If we want to add more conditions later, make sure to update the code accordingly!
-        
-#change the arrays to lists, it will make the runtime a lot faster
-#also, we don't need the failure list anymore, we can just focus on the success lists
-
+print(len(data_list))
+print(data_list)
