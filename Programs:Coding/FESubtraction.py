@@ -23,18 +23,15 @@ from scipy.optimize import curve_fit
 # as in the SDSS
 
 def FE_sub(x, lam, f):
-
-    platelist = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/platelist.fits')
-    specdatalist = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/DR14Q_v4_4.fits')
     test_data = x
-    FE_Template = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/CIV-Variability-master/Fe_UVtemplt_A.dat', delim_whitespace = True)
+    FE_Template = pd.read_csv('../Fe_UVtemplt_A.dat', delim_whitespace = True)
 
     #properties from quasar
     wavelength = lam
     redshift = test_data[2].data['Z']
     flux_rf = f #no need to worry about rf the flux
     wavelength_rf = (wavelength) / (1 + redshift)
-    ivar = 1 / test_data[1].data['ivar']
+    var = 1 / test_data[1].data['ivar']
 
     #properties from iron template
     FE_wavelength = FE_Template['wavelength'].values
@@ -44,8 +41,8 @@ def FE_sub(x, lam, f):
     C4_bounds = (wavelength_rf > 1435) & (wavelength_rf < 1710)
     C4_flux = flux_rf[C4_bounds]
     C4_wavelength = wavelength_rf[C4_bounds]
-    C4_ivar = ivar[C4_bounds]
-    sigma = 1 / np.sqrt(abs(C4_ivar))
+    C4_var = var[C4_bounds]
+    sigma = np.sqrt(abs(C4_var))
 
 
     #the three parameters for the widening of the iron plate, rebinning, and fitting
@@ -66,30 +63,31 @@ def FE_sub(x, lam, f):
         x_new = np.linspace(x[1], x[-2], len(x))
         return x_new, interp1d(x, y)
 
+    def fit_func(lam, A, k, B, m, sigma):
+        nonlocal log_wavelength
+        nonlocal ix
+        FE_convolution = np.convolve(log_FE_spline(log_wavelength), gauss(log_wavelength, m, sigma), mode = 'same')
+        if ix is not None:
+            return (A * lam**k) + (10**B * FE_convolution[ix])
+        else:
+            return (A * lam**k) + (10**B * FE_convolution)
+
     log_FE_wavelength, log_FE_spline = rebin_log(FE_wavelength, FE_flux)
 
- 
+
     #the fit_func is fitting both the continuum AND the FE plate! That's why we are adding
         #both the Alambda^K and the FE.
 
     boundaries = [[0, -2, 10, 1500, 0], [100, 2, 20, 1600, 5000]]
     p0 = [10, 0, 14, 1550, 1000]
     log_wavelength, log_flux = rebin_log(C4_wavelength, C4_flux)
-    
-    def fit_func(lam, A, k, B, m, sigma):
-        global log_wavelength
-        global ix
-        FE_convolution = np.convolve(log_FE_spline(log_wavelength), gauss(log_wavelength, m, sigma), mode = 'same')
-        return (A * lam**k) + (10**B * FE_convolution[ix])
-    
-    print(log_wavelength)
     ix = ((log_wavelength > 1435)&(log_wavelength < 1465)) | ((log_wavelength > 1690)&(log_wavelength < 1710))
     pf, covariances = curve_fit(fit_func, log_wavelength[ix], log_flux(log_wavelength[ix]), sigma = sigma[ix], bounds = boundaries, p0 = p0)
 
-
     C4_cutoffs = (log_wavelength > 1465) & (log_wavelength < 1710) # did not use the pf variables, possible reason
     # why it was not subtracted off correctly.
-    continuum_flux = fit_func(log_wavelength[ix], *pf) #put *pf in for the numbers
+    ix = None
+    continuum_flux = fit_func(log_wavelength, *pf) #put *pf in for the numbers
 
     #print(pf, covariances)
 
@@ -109,7 +107,7 @@ def FE_sub(x, lam, f):
     #converting back to linear space
     subt_log_flux = log_flux(log_wavelength) - continuum_flux
     linear_wavelength, linear_flux = rebin_lin(log_wavelength, subt_log_flux)
-    return linear_wavelength, linear_flux, pf, np.diag(covariances)
+    return linear_wavelength, linear_flux(linear_wavelength), pf, np.diag(covariances)
 
 #plt.plot(log_wavelength, log_flux(log_wavelength) - continuum_flux, label = 'Subtracted Continuum in log space')
 #plt.plot(linear_wavelength, linear_flux(log_wavelength), label = 'Subtracted Continuum in lin space')
