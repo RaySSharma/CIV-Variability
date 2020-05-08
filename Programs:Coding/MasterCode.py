@@ -14,7 +14,8 @@ import FESubtraction
 import Gaussians2
 import glob
 
-quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
+quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits')]
+#quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
 final_list = [['Name', 'MJD', 'Fiber ID', 'Plate', 'EBV', 'Fe pf Values', 
                'Fe Value of A', 'Fe Value of k', 'Fe Value of B', 'Fe Value of Mu',
                'FE Value of Sigma', 'MgII Gaussian Fit', 'MgII Mu Value', 'MgII Sigma Value',
@@ -23,7 +24,7 @@ final_list = [['Name', 'MJD', 'Fiber ID', 'Plate', 'EBV', 'Fe pf Values',
                'CIV K3 Value']]
 
 for i in quasar_list:
-    quasar = fits.open(i)
+    quasar = i
     
     wavelength = 10**quasar[1].data['loglam']
     flux = quasar[1].data['flux']
@@ -31,9 +32,9 @@ for i in quasar_list:
     #starting to go through each code and extracting the properties from it.
     extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux) #returns extinguished 
     #flux and ebv
-    FE_wav, FE_flux, pf, pcov = FESubtraction(quasar, wavelength, extinguished_flux) # returns
+    FE_wav, FE_flux, pf, pcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
     #wavelength, flux, pf, diagonal pcov
-    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2(quasar, FE_wav, FE_flux, var) # this returns the fits
+    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, FE_wav, FE_flux, var) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
     
     A = pcov[0]
@@ -63,4 +64,4 @@ for i in quasar_list:
                        CIV_sig3, CIV_k3])
     
   # take diagonals of the covariance matricies and add these into the list.
-  
+print(final_list)

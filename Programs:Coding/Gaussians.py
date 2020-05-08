@@ -5,13 +5,12 @@ Created on Thu Mar 12 09:36:28 2020
 
 @author: RachelCampo
 """
-
 import numpy as np
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-5407-55926-0636.fits')
+test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits')
 redshift = test_data[2].data['Z']
 lam = (10 ** (test_data[1].data['loglam'])) / (1 + redshift)
 flux = test_data[1].data['flux'] / (1 + redshift)
@@ -27,7 +26,7 @@ sig = (1200 * 2790) / (c) #A
 
 #C4 properties
 C4_bounds = (lam > 1500) & (lam < 1600)
-C4_flux = flux[C4_bounds]
+C4_flux = flux[C4_bounds] 
 C4_lam = lam[C4_bounds]
 C4_ivar = ivar[C4_bounds]
 sig_C4 = (24500 * 1549) / (c) #A
@@ -51,6 +50,10 @@ CIV_condition = (1549, 500, 100, 1000, 100, 10000, 100)
 C4_boundaries = [[1500, 0, 0, 0, 0, 0, 0], [1600, np.inf, 1000, np.inf, 1000, np.inf, 1000]]
 C4_gauss_fit, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition, bounds = C4_boundaries)
 
+
+print(pcov, pcov2)
+print(gauss_fit, C4_gauss_fit)
+
 plt.figure()
 plt.plot(MgII_lam, gaussian(MgII_lam, *gauss_fit), 'b', label = 'Gaussian Curve')
 plt.plot(lam, flux, 'r', label = 'Continuum')
@@ -63,9 +66,9 @@ plt.ylim(-2, 2)
 
 plt.figure()
 plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit), label = 'CIV Full')
-plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit[[0, 1, 2]]), 'k', label = 'Gaussian Curve 1')
-plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit[[0, 3, 4]]), 'b', label = 'Gaussian Curve 2')
-plt.plot(C4_lam, gaussian3(C4_lam, *C4_gauss_fit[[0, 5, 6]]), 'm', label = 'Gaussian Curve 3')
+plt.plot(C4_lam, gaussian(C4_lam, *C4_gauss_fit[[0, 1, 2]]), 'k', label = 'Gaussian Curve 1')
+plt.plot(C4_lam, gaussian(C4_lam, *C4_gauss_fit[[0, 3, 4]]), 'b', label = 'Gaussian Curve 2')
+plt.plot(C4_lam, gaussian(C4_lam, *C4_gauss_fit[[0, 5, 6]]), 'm', label = 'Gaussian Curve 3')
 plt.plot(lam, flux, 'y', alpha = 0.5, label = 'Continuum')
 plt.legend(loc = 'best')
 plt.title('CIV Gaussian Fit')
@@ -79,4 +82,3 @@ plt.ylim(-0.5, 3)
 # upper bounds. Remember all of these must be positive
 # if after all these corrections you find that the fit is still looking strange,
 # you can always adjust mu again to see if it can go outside the boundaries.
-
