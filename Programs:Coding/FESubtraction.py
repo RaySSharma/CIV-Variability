@@ -78,11 +78,7 @@ def FE_sub(x, lam, f):
         nonlocal ix
         FE_convolution = np.convolve(log_FE_spline(log_wavelength), gauss(log_wavelength, m, sigma), mode = 'same')
         if ix is not None:
-            try:
-                return (A * lam**k) + (10**B * FE_convolution[ix])
-            except:
-                import pdb
-                pdb.set_trace()
+            return (A * lam**k) + (10**B * FE_convolution[ix])
         else:
             return (A * lam**k) + (10**B * FE_convolution)
     
