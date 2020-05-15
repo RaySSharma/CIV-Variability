@@ -35,7 +35,7 @@ for i in quasar_list:
     #flux and ebv
     C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
     #wavelength, flux, pf, diagonal pcov
-    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
+    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, wavelength, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
     
     A = C4pcov[0]

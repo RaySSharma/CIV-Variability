@@ -11,29 +11,32 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-def gauss_fit(x, wav, f, var, lam, F):
+def gauss_fit(x, full_wav, wav, f, var, lam, F):
 
     test_data = x
     redshift = test_data[2].data['Z']
-    wavmg2 = wav
-    wavc4 = lam
-    flux_mg2 = f / (1 + redshift)
-    flux_c4 = F / (1 + redshift)
-    ivar = var
+    full_wav_rf = full_wav / (1 + redshift)
+    wavmg2 = lam
+    wavc4 = wav
+    flux_mg2 = F
+    flux_c4 = f
     c = 3 * 10**5
+
+    ivar_mg2 = var[[abs(w - full_wav_rf).argmin() for w in wavmg2]]
+    ivar_c4 = var[[abs(w - full_wav_rf).argmin() for w in wavc4]]
 
     #MgII properties:
     MgII_bounds = (wavmg2 > 2700) & (wavmg2 < 2900)
     MgII_flux = flux_mg2[MgII_bounds]
     MgII_lam = wavmg2[MgII_bounds]
-    MgII_ivar = 1/ np.sqrt(np.abs(ivar[MgII_bounds]))
+    MgII_ivar = 1/ np.sqrt(np.abs(ivar_mg2[MgII_bounds]))
     sig = (1200 * 2790) / (c) #A
 
     #C4 properties
     C4_bounds = (wavc4 > 1500) & (wavc4 < 1600)
     C4_flux = flux_c4[C4_bounds]
     C4_lam = wavc4[C4_bounds]
-    C4_ivar = 1 / np.sqrt(np.abs(ivar[C4_bounds]))
+    C4_ivar = 1 / np.sqrt(np.abs(ivar_c4[C4_bounds]))
     sig_C4 = (24500 * 1549) / (c) #A
 
     def gaussian(x, m, sigma, k):
@@ -54,6 +57,7 @@ def gauss_fit(x, wav, f, var, lam, F):
     CIV_condition = (1549, sig_C4, 100, sig_C4, 100, sig_C4, 100)
     C4_boundaries = [[1500, 0, 0, 0, 0, 0, 0], [1600, np.inf, 1000, np.inf, 1000, np.inf, 1000]]
     C4_gauss_fit, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition, bounds = C4_boundaries, sigma = C4_ivar) 
+    
     return gauss_fit, np.diag(pcov), C4_gauss_fit, np.diag(pcov2)
     
 #plt.figure()

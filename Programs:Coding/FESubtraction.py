@@ -78,7 +78,11 @@ def FE_sub(x, lam, f):
         nonlocal ix
         FE_convolution = np.convolve(log_FE_spline(log_wavelength), gauss(log_wavelength, m, sigma), mode = 'same')
         if ix is not None:
-            return (A * lam**k) + (10**B * FE_convolution[ix])
+            try:
+                return (A * lam**k) + (10**B * FE_convolution[ix])
+            except:
+                import pdb
+                pdb.set_trace()
         else:
             return (A * lam**k) + (10**B * FE_convolution)
     
@@ -97,18 +101,24 @@ def FE_sub(x, lam, f):
     
     ix = None
     continuum_flux = fit_func(log_wavelength, *pf)
+
+    #converting back to linear space
+    subt_log_flux = log_flux(log_wavelength) - continuum_flux
+    linear_wavelength, linear_flux = rebin_lin(log_wavelength, subt_log_flux)
     
     MgII_boundaries = [[0, -2, 10, 2700, 0], [100, 2, 20, 2850, 5000]] #mu = 2798
     MgII_p0 = [10, 0, 15, 2798, 1000]
-    MgII_log_wavelength, MgIIlog_flux = rebin_log(MgII_wavelength, MgII_flux)
-    ix = ((MgII_log_wavelength > 2200)&(MgII_log_wavelength < 2700)) | ((MgII_log_wavelength > 2900)&(MgII_log_wavelength < 3090))
-    MgII_pf, covar = curve_fit(fit_func, MgII_log_wavelength[ix], MgIIlog_flux(MgII_log_wavelength[ix]), sigma = MgII_sigma[ix], bounds = MgII_boundaries, p0 = MgII_p0)
+    log_wavelength, MgIIlog_flux = rebin_log(MgII_wavelength, MgII_flux)
+    ix = ((log_wavelength > 2200)&(log_wavelength < 2700)) | ((log_wavelength > 2900)&(log_wavelength < 3090))
+    MgII_pf, covar = curve_fit(fit_func, log_wavelength[ix], MgIIlog_flux(log_wavelength[ix]), sigma = MgII_sigma[ix], bounds = MgII_boundaries, p0 = MgII_p0)
     
     ix = None
 
     #C4_cutoffs = (log_wavelength > 1465) & (log_wavelength < 1710) 
   
-    MgII_continuum_flux = fit_func(MgII_log_wavelength, *MgII_pf)
+    MgII_continuum_flux = fit_func(log_wavelength, *MgII_pf)
+    flux_sub = MgIIlog_flux(MgII_wavelength) - MgII_continuum_flux
+    lin_lam, lin_flux = rebin_lin(log_wavelength, flux_sub)
 
     #this will be in logspace
     #plt.plot(log_wavelength[ix], log_flux(log_wavelength[ix]), label = 'Original')
@@ -122,14 +132,7 @@ def FE_sub(x, lam, f):
     #plt.xlabel('wavelength')
     #plt.ylabel('flux')
     #plt.legend(loc = 'best')
-
-    #converting back to linear space
-    subt_log_flux = log_flux(log_wavelength) - continuum_flux
-    linear_wavelength, linear_flux = rebin_lin(log_wavelength, subt_log_flux)
-    
-    flux_sub = MgIIlog_flux(MgII_wavelength) - MgII_continuum_flux
-    lin_lam, lin_flux = rebin_lin(MgII_log_wavelength, flux_sub)
-    return linear_wavelength, linear_flux, pf, np.diag(covariances), lin_lam, lin_flux, MgII_pf, np.diag(covar)
+    return linear_wavelength, linear_flux(linear_wavelength), pf, np.diag(covariances), lin_lam, lin_flux(lin_lam), MgII_pf, np.diag(covar)
 
 
 #plt.plot(log_wavelength, log_flux(log_wavelength) - continuum_flux, label = 'Subtracted Continuum in log space')
