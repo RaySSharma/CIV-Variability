@@ -10,7 +10,6 @@ Created on Wed Jan  1 20:34:48 2020
 
 import numpy as np
 from astropy.io import fits
-import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline, interp1d
 from scipy.optimize import curve_fit
@@ -23,15 +22,18 @@ from scipy.optimize import curve_fit
 # as in the SDSS
 
 def FE_sub(x, lam, f):
+
+    platelist = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/platelist.fits')
+    specdatalist = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/DR14Q_v4_4.fits')
     test_data = x
-    FE_Template = pd.read_csv('../Fe_UVtemplt_A.dat', delim_whitespace = True)
+    FE_Template = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/CIV-Variability-master/Fe_UVtemplt_A.dat', delim_whitespace = True)
 
     #properties from quasar
     wavelength = lam
     redshift = test_data[2].data['Z']
     flux_rf = f #no need to worry about rf the flux
     wavelength_rf = (wavelength) / (1 + redshift)
-    var = 1 / test_data[1].data['ivar']
+    ivar = 1 / test_data[1].data['ivar']
 
     #properties from iron template
     FE_wavelength = FE_Template['wavelength'].values
@@ -41,8 +43,15 @@ def FE_sub(x, lam, f):
     C4_bounds = (wavelength_rf > 1435) & (wavelength_rf < 1710)
     C4_flux = flux_rf[C4_bounds]
     C4_wavelength = wavelength_rf[C4_bounds]
-    C4_var = var[C4_bounds]
-    sigma = np.sqrt(abs(C4_var))
+    C4_ivar = ivar[C4_bounds]
+    sigma = np.sqrt(abs(C4_ivar))
+    
+    #MgII properties
+    MgII_bounds = (wavelength_rf > 2700) & (wavelength_rf < 2900)
+    MgII_flux = flux_rf[MgII_bounds]
+    MgII_wavelength = wavelength_rf[MgII_bounds]
+    MgII_ivar = ivar[MgII_bounds]
+    MgII_sigma = np.sqrt(abs(MgII_ivar))
 
 
     #the three parameters for the widening of the iron plate, rebinning, and fitting
@@ -63,6 +72,7 @@ def FE_sub(x, lam, f):
         x_new = np.linspace(x[1], x[-2], len(x))
         return x_new, interp1d(x, y)
 
+    
     def fit_func(lam, A, k, B, m, sigma):
         nonlocal log_wavelength
         nonlocal ix
@@ -71,10 +81,11 @@ def FE_sub(x, lam, f):
             return (A * lam**k) + (10**B * FE_convolution[ix])
         else:
             return (A * lam**k) + (10**B * FE_convolution)
-
+    
+    
     log_FE_wavelength, log_FE_spline = rebin_log(FE_wavelength, FE_flux)
 
-
+ 
     #the fit_func is fitting both the continuum AND the FE plate! That's why we are adding
         #both the Alambda^K and the FE.
 
@@ -83,13 +94,18 @@ def FE_sub(x, lam, f):
     log_wavelength, log_flux = rebin_log(C4_wavelength, C4_flux)
     ix = ((log_wavelength > 1435)&(log_wavelength < 1465)) | ((log_wavelength > 1690)&(log_wavelength < 1710))
     pf, covariances = curve_fit(fit_func, log_wavelength[ix], log_flux(log_wavelength[ix]), sigma = sigma[ix], bounds = boundaries, p0 = p0)
+    
+    MgII_boundaries = [[0, -2, 10, 2700, 0], [100, 2, 20, 2850, 5000]] #mu = 2798
+    MgII_p0 = [10, 0, 15, 2798, 1000]
+    MgII_log_wavelength, MgIIlog_flux = rebin_log(MgII_wavelength, MgII_flux)
+    MgII_ix = ((MgII_log_wavelength > 2150)&(MgII_log_wavelength < 2050)) | ((MgII_log_wavelength > 2650)&(MgII_log_wavelength < 2750))
+    MgII_pf, covar = curve_fit(fit_func, MgII_log_wavelength[MgII_ix], MgIIlog_flux(MgII_log_wavelength[MgII_ix]), sigma = MgII_sigma[MgII_ix], bounds = MgII_boundaries, p0 = MgII_p0)
 
-    C4_cutoffs = (log_wavelength > 1465) & (log_wavelength < 1710) # did not use the pf variables, possible reason
-    # why it was not subtracted off correctly.
+
+    #C4_cutoffs = (log_wavelength > 1465) & (log_wavelength < 1710) 
     ix = None
-    continuum_flux = fit_func(log_wavelength, *pf) #put *pf in for the numbers
-
-    #print(pf, covariances)
+    continuum_flux = fit_func(log_wavelength[ix], *pf)
+    MgII_continuum_flux = fit_func(MgII_log_wavelength[MgII_ix], *MgII_pf)
 
     #this will be in logspace
     #plt.plot(log_wavelength[ix], log_flux(log_wavelength[ix]), label = 'Original')
@@ -107,18 +123,16 @@ def FE_sub(x, lam, f):
     #converting back to linear space
     subt_log_flux = log_flux(log_wavelength) - continuum_flux
     linear_wavelength, linear_flux = rebin_lin(log_wavelength, subt_log_flux)
-    return linear_wavelength, linear_flux(linear_wavelength), pf, np.diag(covariances)
+    
+    flux_sub = MgIIlog_flux(MgII_wavelength) - MgII_continuum_flux
+    lin_lam, lin_flux = rebin_lin(MgII_log_wavelength, flux_sub)
+    return linear_wavelength, linear_flux, pf, np.diag(covariances), lin_lam, lin_flux, MgII_pf, np.diag(covar)
+
 
 #plt.plot(log_wavelength, log_flux(log_wavelength) - continuum_flux, label = 'Subtracted Continuum in log space')
 #plt.plot(linear_wavelength, linear_flux(log_wavelength), label = 'Subtracted Continuum in lin space')
 #plt.xlabel('flux')
 #plt.ylabel('wavelength')
 #plt.legend(loc = 'best')
-
-
-# When plotting the graph, it appeared that the FE subtraction was a straight
-# line, there was no visible emission for the FE line, this could be due to the 
-# fact that the FE emission line below the C4 emission is very weak. I will try
-# other spectra to make sure that the FE subtraction is working correctly.
 
 

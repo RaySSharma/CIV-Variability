@@ -24,6 +24,7 @@ final_list = [['Name', 'MJD', 'Fiber ID', 'Plate', 'EBV', 'Fe pf Values',
                'CIV K3 Value']]
 
 for i in quasar_list:
+    
     quasar = i
     
     wavelength = 10**quasar[1].data['loglam']
@@ -32,16 +33,17 @@ for i in quasar_list:
     #starting to go through each code and extracting the properties from it.
     extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux) #returns extinguished 
     #flux and ebv
-    FE_wav, FE_flux, pf, pcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
+    C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
     #wavelength, flux, pf, diagonal pcov
-    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, FE_wav, FE_flux, var) # this returns the fits
+    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
     
-    A = pcov[0]
-    k = pcov[1]
-    B = pcov[2]
-    mu = pcov[3]
-    sigma = pcov[4]
+    A = C4pcov[0]
+    k = C4pcov[1]
+    B = C4pcov[2]
+    mu = C4pcov[3]
+    sigma = C4pcov[4]
+    
     #pulling out each number from the diagonal from Fe pcov
     
     MgII_mu = mg2pcov[0]
