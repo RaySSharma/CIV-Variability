@@ -40,14 +40,14 @@ def FE_sub(x, lam, f):
     FE_flux = FE_Template['flux'].values
 
     #C4 properties
-    C4_bounds = (wavelength_rf > 1435) & (wavelength_rf < 1710)
+    C4_bounds = (wavelength_rf > 1445) & (wavelength_rf < 1705)
     C4_flux = flux_rf[C4_bounds]
     C4_wavelength = wavelength_rf[C4_bounds]
     C4_ivar = ivar[C4_bounds]
     sigma = np.sqrt(abs(C4_ivar))
     
     #MgII properties
-    MgII_bounds = (wavelength_rf > 2700) & (wavelength_rf < 2900)
+    MgII_bounds = (wavelength_rf > 2200) & (wavelength_rf < 3090)
     MgII_flux = flux_rf[MgII_bounds]
     MgII_wavelength = wavelength_rf[MgII_bounds]
     MgII_ivar = ivar[MgII_bounds]
@@ -92,20 +92,23 @@ def FE_sub(x, lam, f):
     boundaries = [[0, -2, 10, 1500, 0], [100, 2, 20, 1600, 5000]]
     p0 = [10, 0, 14, 1550, 1000]
     log_wavelength, log_flux = rebin_log(C4_wavelength, C4_flux)
-    ix = ((log_wavelength > 1435)&(log_wavelength < 1465)) | ((log_wavelength > 1690)&(log_wavelength < 1710))
+    ix = ((log_wavelength > 1445)&(log_wavelength < 1465)) | ((log_wavelength > 1700)&(log_wavelength < 1705))
     pf, covariances = curve_fit(fit_func, log_wavelength[ix], log_flux(log_wavelength[ix]), sigma = sigma[ix], bounds = boundaries, p0 = p0)
+    
+    ix = None
+    continuum_flux = fit_func(log_wavelength, *pf)
     
     MgII_boundaries = [[0, -2, 10, 2700, 0], [100, 2, 20, 2850, 5000]] #mu = 2798
     MgII_p0 = [10, 0, 15, 2798, 1000]
     MgII_log_wavelength, MgIIlog_flux = rebin_log(MgII_wavelength, MgII_flux)
-    MgII_ix = ((MgII_log_wavelength > 2150)&(MgII_log_wavelength < 2050)) | ((MgII_log_wavelength > 2650)&(MgII_log_wavelength < 2750))
-    MgII_pf, covar = curve_fit(fit_func, MgII_log_wavelength[MgII_ix], MgIIlog_flux(MgII_log_wavelength[MgII_ix]), sigma = MgII_sigma[MgII_ix], bounds = MgII_boundaries, p0 = MgII_p0)
-
+    ix = ((MgII_log_wavelength > 2200)&(MgII_log_wavelength < 2700)) | ((MgII_log_wavelength > 2900)&(MgII_log_wavelength < 3090))
+    MgII_pf, covar = curve_fit(fit_func, MgII_log_wavelength[ix], MgIIlog_flux(MgII_log_wavelength[ix]), sigma = MgII_sigma[ix], bounds = MgII_boundaries, p0 = MgII_p0)
+    
+    ix = None
 
     #C4_cutoffs = (log_wavelength > 1465) & (log_wavelength < 1710) 
-    ix = None
-    continuum_flux = fit_func(log_wavelength[ix], *pf)
-    MgII_continuum_flux = fit_func(MgII_log_wavelength[MgII_ix], *MgII_pf)
+  
+    MgII_continuum_flux = fit_func(MgII_log_wavelength, *MgII_pf)
 
     #this will be in logspace
     #plt.plot(log_wavelength[ix], log_flux(log_wavelength[ix]), label = 'Original')
