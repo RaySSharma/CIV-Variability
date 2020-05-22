@@ -9,19 +9,29 @@ Created on Fri Apr  3 09:16:12 2020
 #this will be the master code for the entire project
 
 from astropy.io import fits
+import numpy as np
 import DustCorrection
 import FESubtraction
 import Gaussians2
 import glob
 
-quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits')]
+quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7128-56567-0284.fits')]
 #quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
-final_list = [['Name', 'MJD', 'Fiber ID', 'Plate', 'EBV', 'Fe pf Values', 
-               'Fe Value of A', 'Fe Value of k', 'Fe Value of B', 'Fe Value of Mu',
-               'FE Value of Sigma', 'MgII Gaussian Fit', 'MgII Mu Value', 'MgII Sigma Value',
-               'MgII K Value', 'CIV Gaussian Fit', 'CIV Mu Value', 'CIV Sigma 1 Value',
-               'CIV K1 Value', 'CIV Sigma 2 Value', 'CIV K2 Value', 'CIV Sigma 3 Value',
-               'CIV K3 Value']]
+final_list = [['Name', 'MJD', 'Fiber ID', 'Plate', 
+               'EBV', 
+               'CIV pf Values from FE Subtraction', 'MgII pf Values from FE Subtraction'
+               'CIV Value of A from FE Subtraction', 'CIV Value of k from FE Subtraction', 
+               'CIV Value of B from FE Subtraction', 'CIV Value of Mu from FE Subtraction',
+               'CIV Value of Sigma from FE Subtraction', 'MgII Value of A from FE Subtraction',
+               'MgII Value of k from FE Subtraction', 'MgII Value of B from FE Subtraction',
+               'MgII Value of Mu from FE Subtraction', 'MgII Value of Sigma from Fe Subtraction',
+               'MgII Gaussian Fit', 'MgII Mu Value from Gaussian Fitting', 
+               'MgII Sigma Value from Gaussian Fitting',
+               'MgII K Value from Gaussian Fitting', 'CIV Gaussian Fit', 
+               'CIV Mu Value from Gaussian Fitting', 'CIV Sigma 1 Value from Gaussian Fitting',
+               'CIV K1 Value from Gaussian Fitting', 'CIV Sigma 2 Value from Gaussian Fitting', 
+               'CIV K2 Value from Gaussian Fitting', 'CIV Sigma 3 Value from Gaussian Fitting',
+               'CIV K3 Value from Gaussian Fitting']]
 
 for i in quasar_list:
     
@@ -35,7 +45,7 @@ for i in quasar_list:
     #flux and ebv
     C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
     #wavelength, flux, pf, diagonal pcov
-    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, wavelength, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
+    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, extinguished_flux, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
     
     A = C4pcov[0]
@@ -43,8 +53,14 @@ for i in quasar_list:
     B = C4pcov[2]
     mu = C4pcov[3]
     sigma = C4pcov[4]
-    
     #pulling out each number from the diagonal from Fe pcov
+    
+    A_mg = MgIIpcov[0]
+    k_mg = MgIIpcov[1]
+    B_mg = MgIIpcov[2]
+    mu_mg = MgIIpcov[3]
+    sigma_mg = MgIIpcov[4]
+    #pulling out covariances of mgII from fe_sub
     
     MgII_mu = mg2pcov[0]
     MgII_sigma = mg2pcov[1]
@@ -59,11 +75,12 @@ for i in quasar_list:
     CIV_sig3 = c4pcov[5]
     CIV_k3 = c4pcov[6]
     
-    final_list.append([quasar[0].data['THING_ID'], quasar[0].data['MJD'], 
-                       quasar[0].data['FIBER_ID'], quasar[0].data['PLATE'], ebv, 
-                       pf, A, k, B, mu, sigma, mg2gauss, MgII_mu, MgII_sigma, MgII_k, 
-                       *c4gauss, CIV_mu, CIV_sig1, CIV_k1, CIV_sig2, CIV_k2, 
+    final_list.append([quasar[2].data['THING_ID'], quasar[2].data['MJD'], 
+                       quasar[2].data['FIBERID'], quasar[2].data['PLATE'], ebv, 
+                       C4pf, MgIIpf, A, k, B, mu, sigma, A_mg, k_mg, B_mg, mu_mg,
+                       sigma_mg, mg2gauss, MgII_mu, MgII_sigma, MgII_k, 
+                       c4gauss, CIV_mu, CIV_sig1, CIV_k1, CIV_sig2, CIV_k2, 
                        CIV_sig3, CIV_k3])
     
   # take diagonals of the covariance matricies and add these into the list.
-print(final_list)
+np.savetxt('final_list.csv', final_list, fmt = '%s')
