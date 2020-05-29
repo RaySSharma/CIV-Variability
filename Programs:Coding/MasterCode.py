@@ -14,10 +14,12 @@ import DustCorrection
 import FESubtraction
 import Gaussians2
 import glob
+import pandas as pd
 
 quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7128-56567-0284.fits')]
 #quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
-final_list = [['Name', 'MJD', 'Fiber ID', 'Plate', 
+final_list = []
+hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
                'EBV', 
                'CIV pf Values from FE Subtraction', 'MgII pf Values from FE Subtraction'
                'CIV Value of A from FE Subtraction', 'CIV Value of k from FE Subtraction', 
@@ -31,7 +33,7 @@ final_list = [['Name', 'MJD', 'Fiber ID', 'Plate',
                'CIV Mu Value from Gaussian Fitting', 'CIV Sigma 1 Value from Gaussian Fitting',
                'CIV K1 Value from Gaussian Fitting', 'CIV Sigma 2 Value from Gaussian Fitting', 
                'CIV K2 Value from Gaussian Fitting', 'CIV Sigma 3 Value from Gaussian Fitting',
-               'CIV K3 Value from Gaussian Fitting']]
+               'CIV K3 Value from Gaussian Fitting']
 
 for i in quasar_list:
     
@@ -81,6 +83,26 @@ for i in quasar_list:
                        sigma_mg, mg2gauss, MgII_mu, MgII_sigma, MgII_k, 
                        c4gauss, CIV_mu, CIV_sig1, CIV_k1, CIV_sig2, CIV_k2, 
                        CIV_sig3, CIV_k3])
-    
-  # take diagonals of the covariance matricies and add these into the list.
-np.savetxt('final_list.csv', final_list, fmt = '%s')
+    data_frame = pd.DataFrame({hdr[0]: [final_list[0][0]], hdr[1]: [final_list[0][1]],
+                               hdr[2]: [final_list[0][2]], hdr[3]: [final_list[0][3]],
+                               hdr[4]: [final_list[0][4]], hdr[5]: [final_list[0][5]],
+                               hdr[6]: [final_list[0][6]], hdr[7]: [final_list[0][7]],
+                               hdr[8]: [final_list[0][8]], hdr[9]: [final_list[0][9]],
+                               hdr[10]: [final_list[0][10]], hdr[11]: [final_list[0][11]],
+                               hdr[12]: [final_list[0][12]], hdr[13]: [final_list[0][13]],
+                               hdr[14]: [final_list[0][14]], hdr[15]: [final_list[0][15]],
+                               hdr[16]: [final_list[0][16]], hdr[17]: [final_list[0][17]],
+                               hdr[18]: [final_list[0][18]], hdr[19]: [final_list[0][19]],
+                               hdr[20]: [final_list[0][20]], hdr[21]: [final_list[0][21]],
+                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
+                               hdr[24]: [final_list[0][24]], hdr[25]: [final_list[0][25]],
+                               hdr[26]: [final_list[0][26]], hdr[27]: [final_list[0][27]]
+                               })
+
+
+data_frame.to_csv('final_list.csv', index = False)
+#comp = dict(method = 'zip', archive_name = 'final_list.csv')
+#data_frame.to_csv('final_list.zip', index = False, compression = comp)
+#np.savetxt('final_list.csv', data_frame, fmt = '%s', delimiter = ',')
+
+#make sure you close each quasar
