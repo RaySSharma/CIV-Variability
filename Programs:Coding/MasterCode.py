@@ -81,21 +81,21 @@ for i in quasar_list:
                        sigma_mg, MgII_mu, MgII_sigma, MgII_k, 
                        CIV_mu, CIV_sig1, CIV_k1, CIV_sig2, CIV_k2, 
                        CIV_sig3, CIV_k3])
-#    data_frame = pd.DataFrame({hdr[0]: [final_list[0][0]], hdr[1]: [final_list[0][1]],
-#                               hdr[2]: [final_list[0][2]], hdr[3]: [final_list[0][3]],
-#                               hdr[4]: [final_list[0][4]], hdr[5]: [final_list[0][5]],
-#                               hdr[6]: [final_list[0][6]], hdr[7]: [final_list[0][7]],
-#                               hdr[8]: [final_list[0][8]], hdr[9]: [final_list[0][9]],
-#                               hdr[10]: [final_list[0][10]], hdr[11]: [final_list[0][11]],
-#                               hdr[12]: [final_list[0][12]], hdr[13]: [final_list[0][13]],
-#                               hdr[14]: [final_list[0][14]], hdr[15]: [final_list[0][15]],
-#                               hdr[16]: [final_list[0][16]], hdr[17]: [final_list[0][17]],
-#                               hdr[18]: [final_list[0][18]], hdr[19]: [final_list[0][19]],
-#                               hdr[20]: [final_list[0][20]], hdr[21]: [final_list[0][21]],
-#                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
-#                               hdr[24]: [final_list[0][24]]})
+    data_frame = pd.DataFrame({hdr[0]: [final_list[0][0]], hdr[1]: [final_list[0][1]],
+                               hdr[2]: [final_list[0][2]], hdr[3]: [final_list[0][3]],
+                               hdr[4]: [final_list[0][4]], hdr[5]: [final_list[0][5]],
+                               hdr[6]: [final_list[0][6]], hdr[7]: [final_list[0][7]],
+                               hdr[8]: [final_list[0][8]], hdr[9]: [final_list[0][9]],
+                               hdr[10]: [final_list[0][10]], hdr[11]: [final_list[0][11]],
+                               hdr[12]: [final_list[0][12]], hdr[13]: [final_list[0][13]],
+                               hdr[14]: [final_list[0][14]], hdr[15]: [final_list[0][15]],
+                               hdr[16]: [final_list[0][16]], hdr[17]: [final_list[0][17]],
+                               hdr[18]: [final_list[0][18]], hdr[19]: [final_list[0][19]],
+                               hdr[20]: [final_list[0][20]], hdr[21]: [final_list[0][21]],
+                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
+                               hdr[24]: [final_list[0][24]]})
     
-    data_frame = pd.DataFrame(final_list, columns = hdr, dtype = str)
+    #data_frame = pd.DataFrame(final_list, columns = hdr, dtype = str)
 
 
 data_frame.to_csv('final_list.csv', index = False)
