@@ -9,7 +9,6 @@ Created on Fri Apr  3 09:16:12 2020
 #this will be the master code for the entire project
 
 from astropy.io import fits
-import numpy as np
 import DustCorrection
 import FESubtraction
 import Gaussians2
@@ -20,16 +19,15 @@ quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra
 #quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
 final_list = []
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
-               'EBV', 
-               'CIV pf Values from FE Subtraction', 'MgII pf Values from FE Subtraction'
+               'EBV',
                'CIV Value of A from FE Subtraction', 'CIV Value of k from FE Subtraction', 
                'CIV Value of B from FE Subtraction', 'CIV Value of Mu from FE Subtraction',
                'CIV Value of Sigma from FE Subtraction', 'MgII Value of A from FE Subtraction',
                'MgII Value of k from FE Subtraction', 'MgII Value of B from FE Subtraction',
                'MgII Value of Mu from FE Subtraction', 'MgII Value of Sigma from Fe Subtraction',
-               'MgII Gaussian Fit', 'MgII Mu Value from Gaussian Fitting', 
+               'MgII Mu Value from Gaussian Fitting', 
                'MgII Sigma Value from Gaussian Fitting',
-               'MgII K Value from Gaussian Fitting', 'CIV Gaussian Fit', 
+               'MgII K Value from Gaussian Fitting',
                'CIV Mu Value from Gaussian Fitting', 'CIV Sigma 1 Value from Gaussian Fitting',
                'CIV K1 Value from Gaussian Fitting', 'CIV Sigma 2 Value from Gaussian Fitting', 
                'CIV K2 Value from Gaussian Fitting', 'CIV Sigma 3 Value from Gaussian Fitting',
@@ -73,31 +71,31 @@ for i in quasar_list:
     CIV_sig1 = c4pcov[1]
     CIV_k1 = c4pcov[2]
     CIV_sig2 = c4pcov[3]
-    CIV_k2 = c4pcov[4]
+    CIV_k2 = c4pcov[4];
     CIV_sig3 = c4pcov[5]
     CIV_k3 = c4pcov[6]
     
     final_list.append([quasar[2].data['THING_ID'], quasar[2].data['MJD'], 
                        quasar[2].data['FIBERID'], quasar[2].data['PLATE'], ebv, 
-                       C4pf, MgIIpf, A, k, B, mu, sigma, A_mg, k_mg, B_mg, mu_mg,
-                       sigma_mg, mg2gauss, MgII_mu, MgII_sigma, MgII_k, 
-                       c4gauss, CIV_mu, CIV_sig1, CIV_k1, CIV_sig2, CIV_k2, 
+                       A, k, B, mu, sigma, A_mg, k_mg, B_mg, mu_mg,
+                       sigma_mg, MgII_mu, MgII_sigma, MgII_k, 
+                       CIV_mu, CIV_sig1, CIV_k1, CIV_sig2, CIV_k2, 
                        CIV_sig3, CIV_k3])
-    data_frame = pd.DataFrame({hdr[0]: [final_list[0][0]], hdr[1]: [final_list[0][1]],
-                               hdr[2]: [final_list[0][2]], hdr[3]: [final_list[0][3]],
-                               hdr[4]: [final_list[0][4]], hdr[5]: [final_list[0][5]],
-                               hdr[6]: [final_list[0][6]], hdr[7]: [final_list[0][7]],
-                               hdr[8]: [final_list[0][8]], hdr[9]: [final_list[0][9]],
-                               hdr[10]: [final_list[0][10]], hdr[11]: [final_list[0][11]],
-                               hdr[12]: [final_list[0][12]], hdr[13]: [final_list[0][13]],
-                               hdr[14]: [final_list[0][14]], hdr[15]: [final_list[0][15]],
-                               hdr[16]: [final_list[0][16]], hdr[17]: [final_list[0][17]],
-                               hdr[18]: [final_list[0][18]], hdr[19]: [final_list[0][19]],
-                               hdr[20]: [final_list[0][20]], hdr[21]: [final_list[0][21]],
-                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
-                               hdr[24]: [final_list[0][24]], hdr[25]: [final_list[0][25]],
-                               hdr[26]: [final_list[0][26]], hdr[27]: [final_list[0][27]]
-                               })
+#    data_frame = pd.DataFrame({hdr[0]: [final_list[0][0]], hdr[1]: [final_list[0][1]],
+#                               hdr[2]: [final_list[0][2]], hdr[3]: [final_list[0][3]],
+#                               hdr[4]: [final_list[0][4]], hdr[5]: [final_list[0][5]],
+#                               hdr[6]: [final_list[0][6]], hdr[7]: [final_list[0][7]],
+#                               hdr[8]: [final_list[0][8]], hdr[9]: [final_list[0][9]],
+#                               hdr[10]: [final_list[0][10]], hdr[11]: [final_list[0][11]],
+#                               hdr[12]: [final_list[0][12]], hdr[13]: [final_list[0][13]],
+#                               hdr[14]: [final_list[0][14]], hdr[15]: [final_list[0][15]],
+#                               hdr[16]: [final_list[0][16]], hdr[17]: [final_list[0][17]],
+#                               hdr[18]: [final_list[0][18]], hdr[19]: [final_list[0][19]],
+#                               hdr[20]: [final_list[0][20]], hdr[21]: [final_list[0][21]],
+#                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
+#                               hdr[24]: [final_list[0][24]]})
+    
+    data_frame = pd.DataFrame(final_list, columns = hdr, dtype = str)
 
 
 data_frame.to_csv('final_list.csv', index = False)
