@@ -31,22 +31,24 @@ final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Pr
 
 #C4pf = final_list.loc[:, ['CIV Gaussian Fit']]
 #Mg2pf = final_list.loc[:, ['MgII Gaussian Fit']]
-mu = final_list.loc[:, 'CIV Mu Value from Gaussian Fitting']
-sig1 = final_list.loc[:, 'CIV Sigma 1 Value from Gaussian Fitting']
-c4k1 = final_list.loc[:, 'CIV K1 Value from Gaussian Fitting']
-sig2 = final_list.loc[:, 'CIV Sigma 2 Value from Gaussian Fitting']
-c4k2 = final_list.loc[:, 'CIV K2 Value from Gaussian Fitting']
-sig3 = final_list.loc[:, 'CIV Sigma 3 Value from Gaussian Fitting']
-c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting']
+mu = final_list.loc[:, 'CIV Mu Value from Gaussian Fitting'].values
+sig1 = final_list.loc[:, 'CIV Sigma 1 Value from Gaussian Fitting'].values
+c4k1 = final_list.loc[:, 'CIV K1 Value from Gaussian Fitting'].values
+sig2 = final_list.loc[:, 'CIV Sigma 2 Value from Gaussian Fitting'].values
+c4k2 = final_list.loc[:, 'CIV K2 Value from Gaussian Fitting'].values
+sig3 = final_list.loc[:, 'CIV Sigma 3 Value from Gaussian Fitting'].values
+c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
+
+#print(mu, sig1, c4k1, sig2, c4k2, sig3, c4k3)
 
 
 def gaussian(x, m, sigma, k):
-        pdb.set_trace()
         sigma = (sigma / c) * m
         g = k * np.exp(-.5 * ((x - m) / sigma)**2)
         return g
 
 def gaussian3(x, m, sigma1, k1, sigma2, k2, sigma3, k3):
+        pdb.set_trace()
         gauss = gaussian(x, m, sigma1, k1) + gaussian(x, m, sigma2, k2) + gaussian(x, m, sigma3, k3)
         return gauss
 
