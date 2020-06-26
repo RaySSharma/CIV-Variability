@@ -28,6 +28,7 @@ flux = test_data[1].data['flux']
 c = 3 * 10 ** 5
 
 final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/final_list.csv', sep = ',', index_col = False)
+Q = len(final_list)
 
 #C4pf = final_list.loc[:, ['CIV Gaussian Fit']]
 #Mg2pf = final_list.loc[:, ['MgII Gaussian Fit']]
@@ -40,15 +41,12 @@ sig3 = final_list.loc[:, 'CIV Sigma 3 Value from Gaussian Fitting'].values
 c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
 
 #print(mu, sig1, c4k1, sig2, c4k2, sig3, c4k3)
-
-
 def gaussian(x, m, sigma, k):
         sigma = (sigma / c) * m
-        g = k * np.exp(-.5 * ((x - m) / sigma)**2)
+        g = k * np.exp(-.5 * ((np.ones((Q, x)) - m.reshape(Q,1)) / sigma)**2)
         return g
 
 def gaussian3(x, m, sigma1, k1, sigma2, k2, sigma3, k3):
-        pdb.set_trace()
         gauss = gaussian(x, m, sigma1, k1) + gaussian(x, m, sigma2, k2) + gaussian(x, m, sigma3, k3)
         return gauss
 
