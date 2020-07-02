@@ -43,7 +43,7 @@ c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
 #print(mu, sig1, c4k1, sig2, c4k2, sig3, c4k3)
 def gaussian(x, m, sigma, k):
         sigma = (sigma / c) * m
-        g = k * np.exp(-.5 * ((np.ones((Q, x)) - m.reshape(Q,1)) / sigma)**2)
+        g = k.reshape(Q, 1) * np.exp(-.5 * ((x * np.ones((Q, len(x))) - m.reshape(Q,1)) / sigma.reshape(Q,1))**2)
         return g
 
 def gaussian3(x, m, sigma1, k1, sigma2, k2, sigma3, k3):
@@ -59,6 +59,8 @@ C4_wav = C4_wav * u.Angstrom
 
 def FWHM(x, y):
     spline = UnivariateSpline(x, y - y.max() / 2, s = 0)
+    #need loop through C4_flux and take out each individual row and feed that 
+    #through FWHM
     a, b = spline.roots()
     return abs(a - b), a, b
 #abs(a-b) is actually delt_lam, it rotational velocity
@@ -66,13 +68,17 @@ def FWHM(x, y):
 def A_to_kms(fwhm, m):
     return const.c * fwhm / m
 
-fwhm, left, right = FWHM(C4_wav, C4_flux)
+for x in C4_flux:
+    list = x
+
+fwhm, left, right = FWHM(C4_wav, list) #may not actually need left and right value
 fwhm = fwhm * u.Angstrom
 fwhm_kms = A_to_kms(fwhm, mu * u.Angstrom)
 print(fwhm, fwhm_kms.to('km/s'))
 
 C4_luminosity = C4_flux * (4 * np.pi * d ** 2)
 
+#may have to loop through again
 def C4_lum(wav, lum):
     return np.trapz(lum, wav)
 
@@ -85,6 +91,7 @@ def L1350(C4_L):
 L_1350 = L1350(C4_L)
 print(L_1350)
 
+#may not need to loop through anything for this one
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * np.log10(lum / (1e44 * u.erg / u.s))
                   + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass
