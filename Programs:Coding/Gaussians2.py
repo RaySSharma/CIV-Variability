@@ -52,11 +52,11 @@ def gauss_fit(x, full_wav, wav, f, var, lam, F):
 
     MgII_conditions = (2798, 1000, 100)
     MgII_boundaries = [[2700, 0, 0], [2900, 5000, 1000]]
-    gauss_fit, pcov = curve_fit(gaussian, MgII_lam, MgII_flux, p0 = MgII_conditions, bounds = MgII_boundaries, sigma = MgII_ivar)
+    gauss_fit, pcov = curve_fit(gaussian, MgII_lam, MgII_flux, p0 = MgII_conditions, bounds = MgII_boundaries, sigma = MgII_ivar, max_nfev=1e4)
 
     CIV_condition = (1549, sig_C4, 100, sig_C4, 100, sig_C4, 100)
     C4_boundaries = [[1500, 0, 0, 0, 0, 0, 0], [1600, np.inf, 1000, np.inf, 1000, np.inf, 1000]]
-    C4_gauss_fit, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition, bounds = C4_boundaries, sigma = C4_ivar) 
+    C4_gauss_fit, pcov2 = curve_fit(gaussian3, C4_lam, C4_flux, p0 = CIV_condition, bounds = C4_boundaries, sigma = C4_ivar, max_nfev=1e4) 
     
     return gauss_fit, np.diag(pcov), C4_gauss_fit, np.diag(pcov2)
     

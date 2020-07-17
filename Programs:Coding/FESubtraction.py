@@ -93,7 +93,7 @@ def FE_sub(x, lam, f):
     p0 = [10, 0, 14, 1550, 1000]
     log_wavelength, log_flux = rebin_log(C4_wavelength, C4_flux)
     ix = ((log_wavelength > 1445)&(log_wavelength < 1465)) | ((log_wavelength > 1700)&(log_wavelength < 1705))
-    pf, covariances = curve_fit(fit_func, log_wavelength[ix], log_flux(log_wavelength[ix]), sigma = sigma[ix], bounds = boundaries, p0 = p0)
+    pf, covariances = curve_fit(fit_func, log_wavelength[ix], log_flux(log_wavelength[ix]), sigma = sigma[ix], bounds = boundaries, p0 = p0, max_nfev=1e4)
     
     ix = None
     continuum_flux = fit_func(log_wavelength, *pf)
@@ -106,7 +106,7 @@ def FE_sub(x, lam, f):
     MgII_p0 = [10, 0, 15, 2798, 1000]
     log_wavelength, MgIIlog_flux = rebin_log(MgII_wavelength, MgII_flux)
     ix = ((log_wavelength > 2200)&(log_wavelength < 2700)) | ((log_wavelength > 2900)&(log_wavelength < 3090))
-    MgII_pf, covar = curve_fit(fit_func, log_wavelength[ix], MgIIlog_flux(log_wavelength[ix]), sigma = MgII_sigma[ix], bounds = MgII_boundaries, p0 = MgII_p0)
+    MgII_pf, covar = curve_fit(fit_func, log_wavelength[ix], MgIIlog_flux(log_wavelength[ix]), sigma = MgII_sigma[ix], bounds = MgII_boundaries, p0 = MgII_p0, max_nfev=1e4)
     
     ix = None
 
