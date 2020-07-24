@@ -17,11 +17,8 @@ from scipy.interpolate import UnivariateSpline
 import pandas as pd
 import pdb
 
-import FESubtraction
-import Gaussians2
-import MasterCode
 
-test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits')
+test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')
 redshift = test_data[2].data['Z']
 wavelength = 10 ** test_data[1].data['loglam'] / (1 + redshift)
 flux = test_data[1].data['flux']
@@ -41,6 +38,7 @@ sig3 = final_list.loc[:, 'CIV Sigma 3 Value from Gaussian Fitting'].values
 c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
 
 #print(mu, sig1, c4k1, sig2, c4k2, sig3, c4k3)
+
 def gaussian(x, m, sigma, k):
         sigma = (sigma / c) * m
         g = k.reshape(Q, 1) * np.exp(-.5 * ((x * np.ones((Q, len(x))) - m.reshape(Q,1)) / sigma.reshape(Q,1))**2)
@@ -106,7 +104,7 @@ delt_lam = np.abs(mu - lam) # this may not be true, this could
 # use the abs(a-b) for rotational, what you calculated here is the translational
 v = (delt_lam * c) / lam
 
-mass_BH = mass_bh(L_1350, v)
+mass_BH = mass_bh(L_1350, fwhm_kms)
 print(np.log10(mass_BH / u.solMass), mass_BH)
 
 
