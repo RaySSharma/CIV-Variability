@@ -94,7 +94,10 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * np.log10(lum / (1e44 * u.erg / u.s))
                   + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass
                   
-
+def other_mass_bh(lum, fwhm):
+    lam_0 = np.trapz(lam * P) / (np.trapz(P)) 
+    sigma_line = (np.trapz((lam - lam_0)**2 * P) / np.trapz(P))**(1/2)
+    return sigma_line
 #will most likely put this into a for loop/function in order to iterate
 #over every quantity
 lam = 1549
