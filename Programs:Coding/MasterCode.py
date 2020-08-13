@@ -15,12 +15,12 @@ import Gaussians2
 import glob
 import pandas as pd
 
-quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7665-57328-0452.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/spec-7128-56567-0284.fits'),
-                fits.open('/Users/RachelCampo/Desktop/Research/Data/spec-7128-56567-0120.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/spec-7128-56567-0171.fits'), 
-                fits.open('/Users/RachelCampo/Desktop/Research/Data/spec-7128-56567-0178.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/spec-7128-56567-0270.fits')]
+quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0180.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')]
+                #its.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0106.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0109.fits'), 
+               # fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0112.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0152.fits')]
 #quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
 final_list = []
-hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
+hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'EBV',
                'CIV Value of A from FE Subtraction', 'Error of CIV A', 'CIV Value of k from FE Subtraction', 
                'Error of CIV K', 'CIV Value of B from FE Subtraction', 'Error of CIV B', 'CIV Value of Mu from FE Subtraction',
@@ -45,6 +45,7 @@ for i in quasar_list:
     wavelength = 10**quasar[1].data['loglam']
     flux = quasar[1].data['flux']
     var = quasar[1].data['ivar']
+    z = quasar[2].data['Z']
     #starting to go through each code and extracting the properties from it.
     extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux) #returns extinguished 
     #flux and ebv
@@ -102,7 +103,7 @@ for i in quasar_list:
     CIV_k3_err = c4pcov[6]
     
     final_list.append([quasar[2].data['THING_ID'], quasar[2].data['MJD'], 
-                       quasar[2].data['FIBERID'], quasar[2].data['PLATE'], ebv, 
+                       quasar[2].data['FIBERID'], quasar[2].data['PLATE'], z, ebv, 
                        A, A_err, k, k_err, B, B_err, mu, mu_err, sigma, sigma_err, 
                        A_mg, A_mg_err, k_mg, k_mg_err, B_mg, B_mg_err, mu_mg, mu_mg_err,
                        sigma_mg, sigma_mg_err, MgII_mu, MgII_mu_err, MgII_sigma, 
@@ -124,7 +125,7 @@ for i in quasar_list:
 #                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
 #                               hdr[24]: [final_list[0][24]]})
     
-    data_frame = pd.DataFrame(final_list, columns = hdr, dtype = str)
+    data_frame = pd.DataFrame(final_list, columns = hdr, dtype = float)
 
 
 data_frame.to_csv('final_list.csv', index = False)

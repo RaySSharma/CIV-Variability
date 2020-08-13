@@ -18,26 +18,32 @@ import pandas as pd
 import pdb
 
 
-test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')
-redshift = test_data[2].data['Z']
-wavelength = 10 ** test_data[1].data['loglam'] / (1 + redshift)
-flux = test_data[1].data['flux']
+#test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')
+#redshift = test_data[2].data['Z']
+#wavelength = 10 ** test_data[1].data['loglam'] / (1 + redshift)
+#flux = test_data[1].data['flux']
 c = 3 * 10 ** 5
 
 final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/final_list.csv', sep = ',', index_col = False)
 Q = len(final_list)
 
-#C4pf = final_list.loc[:, ['CIV Gaussian Fit']]
-#Mg2pf = final_list.loc[:, ['MgII Gaussian Fit']]
 mu = final_list.loc[:, 'CIV Mu Value from Gaussian Fitting'].values
+mu_err = final_list.loc[:, 'Error of CIV Mu from Gaussian Fitting'].values
 sig1 = final_list.loc[:, 'CIV Sigma 1 Value from Gaussian Fitting'].values
+sig1_err = final_list.loc[:, 'Error of CIV Sigma 1 from Gaussian Fitting'].values
 c4k1 = final_list.loc[:, 'CIV K1 Value from Gaussian Fitting'].values
+c4k1_err = final_list.loc[:, 'Error of CIV K1 from Gaussian Fitting'].values
 sig2 = final_list.loc[:, 'CIV Sigma 2 Value from Gaussian Fitting'].values
+sig2_err = final_list.loc[:, 'Error of CIV Sigma 2 from Gaussian Fitting'].values
 c4k2 = final_list.loc[:, 'CIV K2 Value from Gaussian Fitting'].values
+s4k2_err = final_list.loc[:, 'Error of CIV K2 from Gaussian Fitting'].values
 sig3 = final_list.loc[:, 'CIV Sigma 3 Value from Gaussian Fitting'].values
+sig3_err = final_list.loc[:, 'Error of CIV Sigma 3 from Gaussian Fitting'].values
 c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
+c4k3_err = final_list.loc[:, 'Error of CIV K3 from Gaussian Fitting'].values
+redshift = final_list.loc[:, 'Redshift'].values
 
-#print(mu, sig1, c4k1, sig2, c4k2, sig3, c4k3)
+#print(mu, sig1, c4k1, sig2, c4k2, sig3, c4k3, redshift)
 
 def gaussian(x, m, sigma, k):
         sigma = (sigma / c) * m
@@ -94,10 +100,11 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * np.log10(lum / (1e44 * u.erg / u.s))
                   + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass
                   
-def other_mass_bh(lum, fwhm):
-    lam_0 = np.trapz(lam * P) / (np.trapz(P)) 
-    sigma_line = (np.trapz((lam - lam_0)**2 * P) / np.trapz(P))**(1/2)
-    return sigma_line
+#def other_mass_bh(lum, fwhm):
+#    lam_0 = np.trapz(lam * P) / (np.trapz(P)) #P is value of flux at that lambda
+#    #we got this from Gaussians, the linspace
+#    sigma_line = (np.trapz((lam - lam_0)**2 * P) / np.trapz(P))**(1/2)
+#    return sigma_line
 #will most likely put this into a for loop/function in order to iterate
 #over every quantity
 lam = 1549
