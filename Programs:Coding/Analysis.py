@@ -80,7 +80,7 @@ fwhm = fwhm * u.Angstrom
 fwhm_kms = A_to_kms(fwhm, mu * u.Angstrom)
 print(fwhm, fwhm_kms.to('km/s'))
 
-C4_luminosity = len(C4_flux) * (4 * np.pi * d ** 2)
+C4_luminosity = (C4_flux.T * (4 * np.pi * d ** 2)).T # transpose C4_flux
 
 #may have to loop through again
 def C4_lum(wav, lum):
@@ -90,7 +90,7 @@ C4_L = C4_lum(C4_wav, C4_luminosity)
 print(C4_L)
 
 def L1350(C4_L):
-    return 10 ** (7.66 + 0.863 * np.log10(C4_L.value)) * u.erg / u.s
+    return 10 ** (7.66 + 0.863 * np.log10(C4_L / (u.erg / u.s))) * u.erg / u.s
 
 L_1350 = L1350(C4_L)
 print(L_1350)
