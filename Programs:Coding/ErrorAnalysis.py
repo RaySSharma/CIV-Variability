@@ -27,8 +27,6 @@ from scipy.interpolate import UnivariateSpline
 #for the error, you need to calculate lum, fwhm, a, b.
 
 test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')
-redshift = test_data[2].data['Z']
-wavelength = 10 ** test_data[1].data['loglam'] / (1 + redshift)
 flux = test_data[1].data['flux']
 c = 3 * 10 ** 5
 
@@ -52,27 +50,20 @@ sig3 = final_list.loc[:, 'CIV Sigma 3 Value from Gaussian Fitting'].values
 sig3_err = final_list.loc[:, 'Error of CIV Sigma 3 from Gaussian Fitting'].values
 c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
 c4k3_err = final_list.loc[:, 'Error of CIV K3 from Gaussian Fitting'].values
+redshift = final_list.loc[:, 'Redshift'].values
 
 
 #We are also going to assume that a,b have 0 uncertainty (although unlikely)
 
-#lum_err = unumpy.uarray([lum, lum], [0.009, 0.41]) #first is (m,b) and (m_err, b_err)
-
-#fwhm_err = unumpy.uarray([fwhm], [C4_ivar]) #uses the flux variance from Gaussians2
-
-
-
 def gaussian(x, m, sigma, k):
         sigma = (sigma / c) * m
-        g = k.reshape(Q, 1) * unumpy.exp(-.5 * ((x * np.ones((Q, len(x))) - m.reshape(Q,1)) / sigma.reshape(Q,1))**2)
+        g = k.reshape(Q, 1) * unumpy.exp(-.5 * ((x * np.ones((Q, len(x))) - m.reshape(Q, 1)) / sigma.reshape(Q,1))**2)
         return g
 
 def gaussian3(x, unp_array):
         m, sigma1, k1, sigma2, k2, sigma3, k3 = unp_array
         gauss = gaussian(x, m, sigma1, k1) + gaussian(x, m, sigma2, k2) + gaussian(x, m, sigma3, k3)
         return gauss
-
-
 
 C4_wav = np.linspace(1500, 1600, 1000)
 unp_array = unumpy.uarray([mu, sig1, c4k1, sig2, c4k2, sig3, c4k3],
@@ -94,7 +85,7 @@ def A_to_kms(fwhm, m):
 for x in C4_flux:
     list = x
 
-C4_luminosity = C4_flux * (4 * np.pi * d ** 2)
+C4_luminosity = (C4_flux.T * (4 * np.pi * d ** 2)).T #ergs/s/A
 
 def C4_lum(wav, lum):
     return np.trapz(lum, wav)
@@ -102,25 +93,36 @@ def C4_lum(wav, lum):
 C4_L = C4_lum(C4_wav, C4_luminosity) #luminosity error
 
 #doing FWHM manually:
+#put this (from line 106 to line 117) in a for loop 
+for j in range(len(final_list)):
+    mu_new = np.random.normal(loc = mu[j], scale = mu_err[j], size = 1000)
+    sig1_new = np.random.normal(loc = sig1[j], scale = sig1_err[j], size = 1000)
+    sig2_new = np.random.normal(loc = sig2[j], scale = sig2_err[j], size = 1000)
+    sig3_new = np.random.normal(loc = sig3[j], scale = sig3_err[j], size = 1000)
+    c4k1_new = np.random.normal(loc = c4k1[j], scale = c4k1_err[j], size = 1000)
+    c4k2_new = np.random.normal(loc = c4k2[j], scale = c4k2_err[j], size = 1000)
+    c4k3_new = np.random.normal(loc = c4k3[j], scale = c4k3_err[j], size = 1000)
 
-mu_new = np.random.normal(loc = mu[i], scale = mu_err[i], size = 1000)
-sig1_new = np.random.normal(loc = sig1, scale = sig1_err, size = 1000)
-sig2_new = np.random.normal(loc = sig2, scale = sig2_err, size = 1000)
-sig3_new = np.random.normal(loc = sig3, scale = sig3_err, size = 1000)
-c4k1_new = np.random.normal(loc = c4k1, scale = c4k1_err, size = 1000)
-c4k2_new = np.random.normal(loc = c4k2, scale = c4k2_err, size = 1000)
-c4k3_new = np.random.normal(loc = c4k3, scale = c4k3_err, size = 1000)
+    def gauss(x, m, sigma, k):
+        sigma = (sigma / c) * m
+        g = k * unumpy.exp(-.5 * ((x * np.ones((Q, len(x))) - m) / sigma)**2)
+        return g
 
-flux_new = [gaussian3(C4_wav, [mu_new[i], sig1_new[i], c4k1_new[i], sig2_new[i],
-            c4k2_new[i], sig3_new[i], c4k3_new[i]]) for i in range(1000)]
+    def gauss3(x, mu_new, sig1_new, sig2_new, sig3_new, c4k1_new, c4k2_new, c4k3_new):
+        g = gauss(x, mu_new, sig1_new, c4k1_new) + gauss(x, mu_new, sig2_new, c4k2_new) + gauss(x, mu_new, sig3_new, c4k3_new)
+        return g
+
     
-fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
+    flux_new = [gauss3(C4_wav, mu_new[i], sig1_new[i], c4k1_new[i], sig2_new[i],
+                c4k2_new[i], sig3_new[i], c4k3_new[i]) for i in range(1000)]
+
+    fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
 
 #finding black hole mass error:
 
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * np.log10(lum / (1e44 * u.erg / u.s))
-                  + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass
+                  + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass #take out units and change the np.log
 
 bhm_err = mass_bh(C4_L, fwhm_new) #bhm_err
 
@@ -139,3 +141,4 @@ bhm_err = mass_bh(C4_L, fwhm_new) #bhm_err
 #data_frame = pd.DataFrame(error_list, columns = hdr, dtype = str)
 #data_frame.to_csv('error_list.csv', index = False)
 
+#make sure to track the units!
