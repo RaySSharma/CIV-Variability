@@ -15,10 +15,10 @@ import Gaussians2
 import glob
 import pandas as pd
 
-quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0180.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')]
-                #its.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0106.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0109.fits'), 
-               # fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0112.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0152.fits')]
-#quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
+#quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0180.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits'),
+#                fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0106.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0109.fits'), 
+#                fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0112.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0152.fits')]
+quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
 final_list = []
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'EBV',
@@ -40,19 +40,36 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
 
 for i in quasar_list:
     
-    quasar = i
+    quasar = fits.open(i)
     
     wavelength = 10**quasar[1].data['loglam']
     flux = quasar[1].data['flux']
     var = quasar[1].data['ivar']
     z = quasar[2].data['Z']
     #starting to go through each code and extracting the properties from it.
-    extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux) #returns extinguished 
+    try:
+        extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux) #returns extinguished 
     #flux and ebv
-    C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
+    except:
+        print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
+              quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
+              ' has failed the Dust Correction Code')
+    
+    try:
+        C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
     #wavelength, flux, pf, diagonal pcov
-    mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, extinguished_flux, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
+    except:
+        print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
+              quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
+              ' has failed the Iron Subtraction Code')
+        
+    try:    
+        mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, extinguished_flux, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
+    except:
+        print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
+              quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
+              ' has failed the Gaussian Fitting Code')
     
     A = C4pf[0]
     A_err = C4pcov[0]
@@ -111,26 +128,9 @@ for i in quasar_list:
                        CIV_mu, CIV_mu_err, CIV_sig1, CIV_sig1_err, CIV_k1, CIV_k1_err,
                        CIV_sig2, CIV_sig2_err, CIV_k2, CIV_k2_err,
                        CIV_sig3, CIV_sig3_err, CIV_k3, CIV_k3_err])
-    #data_frame = pd.DataFrame({hdr[0]: [final_list[0][0]], hdr[1]: [final_list[0][1]],
-#                               hdr[2]: [final_list[0][2]], hdr[3]: [final_list[0][3]],
-#                               hdr[4]: [final_list[0][4]], hdr[5]: [final_list[0][5]],
-#                               hdr[6]: [final_list[0][6]], hdr[7]: [final_list[0][7]],
-#                               hdr[8]: [final_list[0][8]], hdr[9]: [final_list[0][9]],
-#                               hdr[10]: [final_list[0][10]], hdr[11]: [final_list[0][11]],
-#                               hdr[12]: [final_list[0][12]], hdr[13]: [final_list[0][13]],
-#                               hdr[14]: [final_list[0][14]], hdr[15]: [final_list[0][15]],
-#                               hdr[16]: [final_list[0][16]], hdr[17]: [final_list[0][17]],
-#                               hdr[18]: [final_list[0][18]], hdr[19]: [final_list[0][19]],
-#                               hdr[20]: [final_list[0][20]], hdr[21]: [final_list[0][21]],
-#                               hdr[22]: [final_list[0][22]], hdr[23]: [final_list[0][23]],
-#                               hdr[24]: [final_list[0][24]]})
+
     
     data_frame = pd.DataFrame(final_list, columns = hdr, dtype = float)
-
+    quasar.close()
 
 data_frame.to_csv('final_list.csv', index = False)
-#comp = dict(method = 'zip', archive_name = 'final_list.csv')
-#data_frame.to_csv('final_list.zip', index = False, compression = comp)
-#np.savetxt('final_list.csv', data_frame, fmt = '%s', delimiter = ',')
-
-#make sure you close each quasar
