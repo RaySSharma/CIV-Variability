@@ -22,6 +22,8 @@ from scipy.optimize import curve_fit
 from astropy.cosmology import Planck15 as p15
 import astropy.constants as const
 from scipy.interpolate import UnivariateSpline
+import pdb
+
 
 
 #for the error, you need to calculate lum, fwhm, a, b.
@@ -75,6 +77,7 @@ d = p15.luminosity_distance(redshift).to('cm')
 #C4_wav = C4_wav * u.Angstrom
 
 def FWHM(x, y):
+    #pdb.set_trace()
     spline = UnivariateSpline(x, y - y.max() / 2, s = 0)
     a, b = spline.roots()
     return abs(a - b), a, b
@@ -93,7 +96,6 @@ def C4_lum(wav, lum):
 C4_L = C4_lum(C4_wav, C4_luminosity) #luminosity error
 
 #doing FWHM manually:
-#put this (from line 106 to line 117) in a for loop 
 for j in range(len(final_list)):
     mu_new = np.random.normal(loc = mu[j], scale = mu_err[j], size = 1000)
     sig1_new = np.random.normal(loc = sig1[j], scale = sig1_err[j], size = 1000)
@@ -105,26 +107,29 @@ for j in range(len(final_list)):
 
     def gauss(x, m, sigma, k):
         sigma = (sigma / c) * m
-        g = k * unumpy.exp(-.5 * ((x * np.ones((Q, len(x))) - m) / sigma)**2)
+        g = k * np.exp(-.5 * ((x - m) / sigma)**2)
         return g
 
     def gauss3(x, mu_new, sig1_new, sig2_new, sig3_new, c4k1_new, c4k2_new, c4k3_new):
         g = gauss(x, mu_new, sig1_new, c4k1_new) + gauss(x, mu_new, sig2_new, c4k2_new) + gauss(x, mu_new, sig3_new, c4k3_new)
         return g
 
-    
-    flux_new = [gauss3(C4_wav, mu_new[i], sig1_new[i], c4k1_new[i], sig2_new[i],
-                c4k2_new[i], sig3_new[i], c4k3_new[i]) for i in range(1000)]
+    flux_new = [gauss3(C4_wav, mu_new[i], sig1_new[i], sig2_new[i], sig3_new[i],
+                c4k1_new[i], c4k2_new[i], c4k3_new[i]) for i in range(1000)]
 
-    fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
+    try:
+        fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
+        fwhm_err = np.std(fwhm_new)
+    except:
+        print('FWHM Error for Quasar')
 
 #finding black hole mass error:
-
+#pdb.set_trace()
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * np.log10(lum / (1e44 * u.erg / u.s))
                   + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass #take out units and change the np.log
 
-bhm_err = mass_bh(C4_L, fwhm_new) #bhm_err
+bhm_err = mass_bh(C4_L, fwhm_err) #bhm_err
 
 
 #hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
