@@ -77,10 +77,13 @@ d = p15.luminosity_distance(redshift).to('cm')
 #C4_wav = C4_wav * u.Angstrom
 
 def FWHM(x, y):
-    #pdb.set_trace()
-    spline = UnivariateSpline(x, y - y.max() / 2, s = 0)
-    a, b = spline.roots()
-    return abs(a - b), a, b
+    y_new = y - y.min()
+    spline = UnivariateSpline(x, y_new - y_new.max() / 2, s = 0)
+    try:
+        a, b = spline.roots()
+    except:
+        return np.nan
+    return abs(a - b)
 
 def A_to_kms(fwhm, m):
     return const.c * fwhm / m
@@ -117,19 +120,29 @@ for j in range(len(final_list)):
     flux_new = [gauss3(C4_wav, mu_new[i], sig1_new[i], sig2_new[i], sig3_new[i],
                 c4k1_new[i], c4k2_new[i], c4k3_new[i]) for i in range(1000)]
 
-    try:
-        fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
-        fwhm_err = np.std(fwhm_new)
-    except:
-        print('FWHM Error for Quasar')
+    fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
+    fwhm_err_std = np.nanstd(fwhm_new)
+    fwhm_err_mean = np.nanmean(fwhm_new)
+
+    mean_list = []
+    std_list = []
+    fwhm_final_mean = A_to_kms(fwhm_err_mean * u.Angstrom, mu[j] * u.Angstrom).to('km/s').value
+    fwhm_final_std = A_to_kms(fwhm_err_std * u.Angstrom, mu[j] * u.Angstrom).to('km/s').value #you want to make a list of this for each quasar
+    #convert these into a unumpy for uncertainties
+    
+    mean_list.append(fwhm_final_mean)
+    std_list.append(fwhm_final_std)
+
+fwhm_unumpy = unumpy.uarray([mean_list],[std_list])
+fwhm_unp = unumpy.nominal_values(fwhm_unumpy)
 
 #finding black hole mass error:
-#pdb.set_trace()
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
-    return 10 ** (a + b * np.log10(lum / (1e44 * u.erg / u.s))
-                  + 2 * np.log10(fwhm / (u.km / u.s))) * u.solMass #take out units and change the np.log
+    return 10 ** (a + b * unumpy.log10(lum / 1e44)
+                  + 2 * unumpy.log10(fwhm))#take out units and change the np.log
 
-bhm_err = mass_bh(C4_L, fwhm_err) #bhm_err
+bhm_err = mass_bh(C4_L.value, fwhm_unp) #bhm_err
+print('The black hole mass error is:', bhm_err)
 
 
 #hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
