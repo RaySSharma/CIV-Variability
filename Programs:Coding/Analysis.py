@@ -7,15 +7,11 @@ Created on Thu Apr 30 13:40:22 2020
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from astropy.io import fits
 from astropy import units as u
-from scipy.optimize import curve_fit
 from astropy.cosmology import Planck15 as p15
 import astropy.constants as const
 from scipy.interpolate import UnivariateSpline
 import pandas as pd
-import pdb
 
 
 #test_data = fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits')
@@ -24,7 +20,7 @@ import pdb
 #flux = test_data[1].data['flux']
 c = 3 * 10 ** 5
 
-final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/final_list.csv', sep = ',', index_col = False)
+final_list = pd.read_csv('data2/rlc186/QuasarData/final_list.csv', sep = ',', index_col = False)
 Q = len(final_list)
 
 mu = final_list.loc[:, 'CIV Mu Value from Gaussian Fitting'].values
