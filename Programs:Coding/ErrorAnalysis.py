@@ -73,7 +73,7 @@ unp_array = unumpy.uarray([mu, sig1, c4k1, sig2, c4k2, sig3, c4k3],
 
 C4_flux = gaussian3(C4_wav, unp_array)
 d = p15.luminosity_distance(redshift).to('cm')
-#C4_flux = C4_flux * 10 ** -17 * u.erg / u.s / u.cm / u.cm / u.Angstrom
+C4_flux = C4_flux * 10 ** -17
 #C4_wav = C4_wav * u.Angstrom
 
 def FWHM(x, y):
@@ -99,6 +99,9 @@ def C4_lum(wav, lum):
 C4_L = C4_lum(C4_wav, C4_luminosity) #luminosity error
 
 #doing FWHM manually:
+mean_list = []
+std_list = []
+
 for j in range(len(final_list)):
     mu_new = np.random.normal(loc = mu[j], scale = mu_err[j], size = 1000)
     sig1_new = np.random.normal(loc = sig1[j], scale = sig1_err[j], size = 1000)
@@ -124,8 +127,7 @@ for j in range(len(final_list)):
     fwhm_err_std = np.nanstd(fwhm_new)
     fwhm_err_mean = np.nanmean(fwhm_new)
 
-    mean_list = []
-    std_list = []
+   
     fwhm_final_mean = A_to_kms(fwhm_err_mean * u.Angstrom, mu[j] * u.Angstrom).to('km/s').value
     fwhm_final_std = A_to_kms(fwhm_err_std * u.Angstrom, mu[j] * u.Angstrom).to('km/s').value #you want to make a list of this for each quasar
     #convert these into a unumpy for uncertainties
@@ -133,7 +135,7 @@ for j in range(len(final_list)):
     mean_list.append(fwhm_final_mean)
     std_list.append(fwhm_final_std)
 
-fwhm_unumpy = unumpy.uarray([mean_list],[std_list])
+fwhm_unumpy = unumpy.uarray(mean_list, std_list)
 fwhm_unp = unumpy.nominal_values(fwhm_unumpy)
 
 #finding black hole mass error:
@@ -141,7 +143,7 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * unumpy.log10(lum / 1e44)
                   + 2 * unumpy.log10(fwhm))#take out units and change the np.log
 
-bhm_err = mass_bh(C4_L.value, fwhm_unp) #bhm_err
+bhm_err = mass_bh(C4_L.value, fwhm_unumpy) #bhm_err
 print('The black hole mass error is:', bhm_err)
 
 
