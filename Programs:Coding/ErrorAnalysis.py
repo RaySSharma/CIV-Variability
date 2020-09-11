@@ -14,6 +14,7 @@ from astropy.io import fits
 import matplotlib.pyplot as plt
 import scipy.integrate as spi
 from uncertainties import unumpy
+import uncertainties
 import pandas as pd
 import Analysis2
 import Gaussians
@@ -54,6 +55,10 @@ c4k3 = final_list.loc[:, 'CIV K3 Value from Gaussian Fitting'].values
 c4k3_err = final_list.loc[:, 'Error of CIV K3 from Gaussian Fitting'].values
 redshift = final_list.loc[:, 'Redshift'].values
 
+name = final_list.loc[:, 'Name'].values
+mjd = final_list.loc[:, 'MJD'].values
+fiberid = final_list.loc[:, 'Fiber ID'].values
+plate = final_list.loc[:, 'Plate'].values
 
 #We are also going to assume that a,b have 0 uncertainty (although unlikely)
 
@@ -87,9 +92,6 @@ def FWHM(x, y):
 
 def A_to_kms(fwhm, m):
     return const.c * fwhm / m
-
-for x in C4_flux:
-    list = x
 
 C4_luminosity = (C4_flux.T * (4 * np.pi * d ** 2)).T #ergs/s/A
 
@@ -144,21 +146,28 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
                   + 2 * unumpy.log10(fwhm))#take out units and change the np.log
 
 bhm_err = mass_bh(C4_L.value, fwhm_unumpy) #bhm_err
-print('The black hole mass error is:', bhm_err)
+#bhm_values = unumpy.nominal_values(bhm_err)
+#bhm_std = uncertainties.std_dev(bhm_err)
+#
+#C4_L_values = unumpy.nominal_values(C4_L)
+#C4_L_std = uncertainties.std_devs(C4_L)
+
+#fig, ax = plt.subplots()
+#
+#ax.errorbar(C4_L_values, bhm_values, xerr = C4_L_std, yerr = bhm_std, fmt = 'o')
+#ax.set_xlabel('Luminosity w/ Error')
+#ax.set_ylabel('Black Hole Mass w/ Error (Solar Masses)')
+#ax.set_title('Luminiosity vs. Black Hole Mass')
 
 
-#hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
-#       'Error of Luminosity Using Bisector: Slope (m)', 'Error of Luminosity Using Bisector: (b)',
-#       'Error of Luminosity Using Y|X: Slope (m)', 'Error of Luminosity Using Y|X: b',
-#       'Error of FWHM',
-#       'Error of Black Hole Mass: Bisector', 'Error of Black Hole Mass: Y|X']
-#
-#error_list = [quasar[2].data['THING_ID'], quasar[2].data['MJD'], 
-#              quasar[2].data['FIBERID'], quasar[2].data['PLATE'],
-#              lum_err_m, lum_err_b, lum_err_m2, lum_err_b2, fwhm_err,
-#              bhm_err, bhm_err2
-#
-#data_frame = pd.DataFrame(error_list, columns = hdr, dtype = str)
-#data_frame.to_csv('error_list.csv', index = False)
+hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 
+       'Black Hole Mass and Error (Solar Mass)', 'Luminosity Error', 
+       'Full Width Half Max Error']
+
+error_list = [name, mjd, fiberid, plate,
+              bhm_err, C4_L, fwhm_unumpy]
+
+data_frame = pd.DataFrame(error_list, columns = hdr, dtype = str)
+data_frame.to_csv('error_list.csv', index = False)
 
 #make sure to track the units!
