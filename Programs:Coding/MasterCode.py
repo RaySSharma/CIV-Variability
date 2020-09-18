@@ -53,6 +53,7 @@ for filename in spectra:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
               quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
               ' has failed the Dust Correction Code')
+        continue
     
     try:
         C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
@@ -61,6 +62,7 @@ for filename in spectra:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
               quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
               ' has failed the Iron Subtraction Code')
+        continue
         
     try:    
         mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, wavelength, C4_wav, C4_flux, ivar, MgII_wav, MgII_flux) # this returns the fits
@@ -69,6 +71,7 @@ for filename in spectra:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
               quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
               ' has failed the Gaussian Fitting Code')
+        continue
     
     A = C4pf[0]
     A_err = C4pcov[0]

@@ -14,19 +14,10 @@ import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline, interp1d
 from scipy.optimize import curve_fit
 
-# first I will import from the SDSS the platelist file, which containts all the
-# plates used on the telescope.
-# then I will import 
-
-# for the iron template, from the Vestergaard paper, the units are the same
-# as in the SDSS
-
 def FE_sub(x, lam, f):
 
-    platelist = fits.open('/Users/RachelCampo/Desktop/Research/Data/Other Spectra/platelist.fits')
-    specdatalist = fits.open('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/DR14Q_v4_4.fits')
     test_data = x
-    FE_Template = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/CIV-Variability-master/Fe_UVtemplt_A.dat', delim_whitespace = True)
+    FE_Template = pd.read_csv('../Fe_UVtemplt_A.dat', delim_whitespace = True)
 
     #properties from quasar
     wavelength = lam
@@ -116,25 +107,6 @@ def FE_sub(x, lam, f):
     flux_sub = MgIIlog_flux(MgII_wavelength) - MgII_continuum_flux
     lin_lam, lin_flux = rebin_lin(log_wavelength, flux_sub)
 
-    #this will be in logspace
-    #plt.plot(log_wavelength[ix], log_flux(log_wavelength[ix]), label = 'Original')
-    #plt.plot(log_wavelength[ix], continuum_flux, label = 'Continuum + Iron')
-    ##plt.plot(log_wavelength, log_flux(log_wavelength) - continuum_flux, label = 'Subtracted Continuum')
-    #plt.legend(loc = 'best')
-    #
-    #plt.plot(log_wavelength, log_flux(log_wavelength), label = 'Original')
-    #plt.plot(log_wavelength, continuum_flux, label = 'Continuum + Iron')
-    #plt.plot(log_wavelength, log_flux(log_wavelength) - continuum_flux, label = 'Subtracted')
-    #plt.xlabel('wavelength')
-    #plt.ylabel('flux')
-    #plt.legend(loc = 'best')
     return linear_wavelength, linear_flux(linear_wavelength), pf, np.diag(covariances), lin_lam, lin_flux(lin_lam), MgII_pf, np.diag(covar)
-
-
-#plt.plot(log_wavelength, log_flux(log_wavelength) - continuum_flux, label = 'Subtracted Continuum in log space')
-#plt.plot(linear_wavelength, linear_flux(log_wavelength), label = 'Subtracted Continuum in lin space')
-#plt.xlabel('flux')
-#plt.ylabel('wavelength')
-#plt.legend(loc = 'best')
 
 
