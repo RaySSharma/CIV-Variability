@@ -12,8 +12,6 @@ import scipy.integrate as spi
 from uncertainties import unumpy
 import uncertainties
 import pandas as pd
-import Analysis2
-import Gaussians
 from astropy import units as u
 from scipy.optimize import curve_fit
 from astropy.cosmology import Planck15 as p15
@@ -23,8 +21,7 @@ import pdb
 
 #for the error, you need to calculate lum, fwhm, a, b.
 c = 3 * 10 ** 5
-lum, fwhm, bhm = Analysis2.analysis()
-final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/final_list.csv', sep = ',', index_col = False)
+final_list = pd.read_csv('./final_list.csv', sep = ',', index_col = False)
 Q = len(final_list)
 
 mu = final_list.loc[:, 'CIV Mu Value from Gaussian Fitting'].values
@@ -164,7 +161,7 @@ for j in range(len(final_list)):
 fwhm_unumpy = unumpy.uarray(mean_list, std_list)
 fwhm_unumpy_mg = unumpy.uarray(mg_mean_list, mg_std_list)
 
-
+print(C4_L)
 #finding black hole mass error:
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     return 10 ** (a + b * unumpy.log10(lum / 1e44)
@@ -172,7 +169,7 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
 
 bhm_err = mass_bh(C4_L.value, fwhm_unumpy) #bhm_err
 bhm_err_mg = mass_bh(Mg_L.value, fwhm_unumpy_mg)
-print(bhm_err_mg)
+
 
 bhm_n = unumpy.nominal_values(bhm_err)
 bhm_std = unumpy.std_devs(bhm_err)
@@ -197,7 +194,7 @@ ax.set_xscale('log')
 plt.show()
 
 #
-#hdr = ['Name', 'MJD', 'Fiber ID', 'Plate']
+hdr = ['Name', 'MJD', 'Fiber ID', 'Plate']
 #       'Black Hole Mass Using CIV (Solar Mass)', 'Black Hole Mass Using CIV Error',
 #       'Luminosity Using CIV (ergs/s)', 'Luminosity Using CIV Error',
 #       'Full Width Half Max Using CIV (km/s)', 'Full Width Half Max Using CIV Error']
@@ -206,7 +203,7 @@ plt.show()
 #       'Full Width Half Max Using MgII (km/s)', 'Full Width Half Max Using MgII Error'
 #       'Line Shift of CIV (km/s)', 'Line Shift of MgII (km/s)']
 #
-#error_list = [name, mjd, fiberid, plate]
+error_list = [name, mjd, fiberid, plate]
 #              bhm_n, bhm_std,
 #              C4_L_values, C4_L_std,
 #              fwhm_unp, fwhm_std]

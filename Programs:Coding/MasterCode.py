@@ -15,11 +15,10 @@ import Gaussians2
 import glob
 import pandas as pd
 
-#quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0180.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits'),
-#                fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0106.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0109.fits'), 
-#                fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0112.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0152.fits')]
-quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
+spectra_dir = '/data2/rlc186/QuasarData/'
+spectra = ['spec-5202-55824-0105', 'spec-5202-55824-0106', 'spec-5202-55824-0112', 'spec-5202-55824-0115', 'spec-5202-55824-0118', 'spec-5202-55824-0152', 'spec-5202-55824-0180', 'spec-5202-55824-0194', 'spec-5202-55824-0224', 'spec-5202-55824-0295', 'spec-5202-55824-0308', 'spec-5202-55824-0338', 'spec-5202-55824-0340', 'spec-7128-56567-0120', 'spec-7128-56567-0171', 'spec-7128-56567-0178', 'spec-7128-56567-0270']
 final_list = []
+
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'EBV',
                'CIV Value of A from FE Subtraction', 'Error of CIV A', 'CIV Value of k from FE Subtraction', 
@@ -38,13 +37,13 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'CIV Sigma 3 Value from Gaussian Fitting', 'Error of CIV Sigma 3 from Gaussian Fitting',
                'CIV K3 Value from Gaussian Fitting', 'Error of CIV K3 from Gaussian Fitting']
 
-for i in quasar_list:
+for filename in spectra:
     
-    quasar = fits.open(i)
+    quasar = fits.open(spectra_dir + filename)
     
     wavelength = 10**quasar[1].data['loglam']
     flux = quasar[1].data['flux']
-    var = quasar[1].data['ivar']
+    ivar = quasar[1].data['ivar']
     z = quasar[2].data['Z']
     #starting to go through each code and extracting the properties from it.
     try:
@@ -64,7 +63,7 @@ for i in quasar_list:
               ' has failed the Iron Subtraction Code')
         
     try:    
-        mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, extinguished_flux, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
+        mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, wavelength, C4_wav, C4_flux, ivar, MgII_wav, MgII_flux) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
     except:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
