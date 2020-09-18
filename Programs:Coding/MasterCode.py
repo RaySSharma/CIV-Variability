@@ -14,6 +14,7 @@ import FESubtraction
 import Gaussians2
 import glob
 import pandas as pd
+import tqdm
 
 spectra_dir = '/data2/rlc186/QuasarData/'
 spectra = ['spec-5202-55824-0105', 'spec-5202-55824-0106', 'spec-5202-55824-0112', 'spec-5202-55824-0115', 'spec-5202-55824-0118', 'spec-5202-55824-0152', 'spec-5202-55824-0180', 'spec-5202-55824-0194', 'spec-5202-55824-0224', 'spec-5202-55824-0295', 'spec-5202-55824-0308', 'spec-5202-55824-0338', 'spec-5202-55824-0340', 'spec-7128-56567-0120', 'spec-7128-56567-0171', 'spec-7128-56567-0178', 'spec-7128-56567-0270']
@@ -37,7 +38,7 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'CIV Sigma 3 Value from Gaussian Fitting', 'Error of CIV Sigma 3 from Gaussian Fitting',
                'CIV K3 Value from Gaussian Fitting', 'Error of CIV K3 from Gaussian Fitting']
 
-for filename in spectra:
+for filename in tqdm.tqdm(spectra):
     
     quasar = fits.open(spectra_dir + filename)
     

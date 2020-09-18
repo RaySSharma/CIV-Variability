@@ -17,7 +17,6 @@ from scipy.optimize import curve_fit
 from astropy.cosmology import Planck15 as p15
 import astropy.constants as const
 from scipy.interpolate import UnivariateSpline
-import pdb
 
 #for the error, you need to calculate lum, fwhm, a, b.
 c = 3 * 10 ** 5
@@ -78,10 +77,7 @@ uarray = unumpy.uarray([mu_mg, mg_sig, mg_k], [mu_mg_er, mg_sig_er, mg_k_er])
 
 C4_flux = gaussian3(C4_wav, unp_array)
 Mg_flux = Gaussian(Mg_wav, uarray)
-d = p15.luminosity_distance(redshift).to('cm')
-C4_flux = C4_flux * 10 ** -17
-mg_flux = Mg_flux * 10 ** -17
-#C4_wav = C4_wav * u.Angstrom
+d = p15.luminosity_distance(redshift).to('cm').value
 
 def FWHM(x, y):
     y_new = y - y.min()
@@ -95,14 +91,9 @@ def FWHM(x, y):
 def A_to_kms(fwhm, m):
     return const.c * fwhm / m
 
-C4_luminosity = (C4_flux.T * (4 * np.pi * d ** 2)).T #ergs/s/A
-Mg_luminosity = (mg_flux.T * (4 * np.pi * d ** 2)).T
-
-def C4_lum(wav, lum):
+def line_luminosity(wav, flux, dist):
+    lum = 1e-17 * 4 * np.pi * dist**2 * flux
     return np.trapz(lum, wav)
-
-C4_L = C4_lum(C4_wav, C4_luminosity) #luminosity error
-Mg_L = C4_lum(Mg_wav, Mg_luminosity)
 
 #doing FWHM manually:
 mean_list = []
@@ -110,6 +101,9 @@ std_list = []
 
 mg_mean_list = []
 mg_std_list = []
+
+civ_mean_lum, mgii_mean_lum = [], []
+civ_std_lum, mgii_std_lum = [], []
 
 for j in range(len(final_list)):
     mu_new = np.random.normal(loc = mu[j], scale = mu_err[j], size = 1000)
@@ -133,12 +127,22 @@ for j in range(len(final_list)):
         g = gauss(x, mu_new, sig1_new, c4k1_new) + gauss(x, mu_new, sig2_new, c4k2_new) + gauss(x, mu_new, sig3_new, c4k3_new)
         return g
 
-    flux_new = [gauss3(C4_wav, mu_new[i], sig1_new[i], sig2_new[i], sig3_new[i],
+    civ_flux_varied = [gauss3(C4_wav, mu_new[i], sig1_new[i], sig2_new[i], sig3_new[i],
                 c4k1_new[i], c4k2_new[i], c4k3_new[i]) for i in range(1000)]
-    mg_flux_new = [gauss(Mg_wav, mg_mu_new[u], mg_sig_new[u], mg_k_new[u]) for u in range(1000)]
+    mgii_flux_varied = [gauss(Mg_wav, mg_mu_new[u], mg_sig_new[u], mg_k_new[u]) for u in range(1000)]
 
-    fwhm_new = [FWHM(C4_wav, x) for x in flux_new] #fwhm err
-    fwhm_mg = [FWHM(Mg_wav, y) for y in mg_flux_new]
+    # Luminosity
+    civ_lum_varied = [line_luminosity(C4_wav, x, d[j]) for x in civ_flux_varied]
+    civ_mean_lum.append(np.nanmean(civ_lum_varied))
+    civ_std_lum.append(np.nanstd(civ_lum_varied))
+
+    mgii_lum_varied = [line_luminosity(Mg_wav, y, d[j]) for y in mgii_flux_varied]
+    mgii_mean_lum.append(np.nanmean(mgii_lum_varied))
+    mgii_std_lum.append(np.nanstd(mgii_lum_varied))
+
+    # FWHM
+    fwhm_new = [FWHM(C4_wav, x) for x in civ_flux_varied] #fwhm err
+    fwhm_mg = [FWHM(Mg_wav, y) for y in mgii_flux_varied]
     fwhm_mg_std = np.nanstd(fwhm_mg)
     fwhm_mg_mean = np.nanmean(fwhm_mg)
     fwhm_err_std = np.nanstd(fwhm_new)
@@ -158,24 +162,26 @@ for j in range(len(final_list)):
     mg_mean_list.append(fwhm_final_mean_mg)
     mg_std_list.append(fwhm_final_std_mg)
 
+lum_unumpy = unumpy.uarray(civ_mean_lum, civ_std_lum)
+lum_unumpy_mg = unumpy.uarray(mgii_mean_lum, mgii_std_lum)
+
 fwhm_unumpy = unumpy.uarray(mean_list, std_list)
 fwhm_unumpy_mg = unumpy.uarray(mg_mean_list, mg_std_list)
 
-print(C4_L)
 #finding black hole mass error:
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
-    return 10 ** (a + b * unumpy.log10(lum / 1e44)
-                  + 2 * unumpy.log10(fwhm))
+    finite_ix = unumpy.nominal_values(lum) > 0
+    return 10 ** (a + b * unumpy.log10(lum[finite_ix] / 1e44)
+                  + 2 * unumpy.log10(fwhm[finite_ix]))
 
-bhm_err = mass_bh(C4_L.value, fwhm_unumpy) #bhm_err
-bhm_err_mg = mass_bh(Mg_L.value, fwhm_unumpy_mg)
-
+bhm_err = mass_bh(lum_unumpy, fwhm_unumpy) #bhm_err
+bhm_err_mg = mass_bh(lum_unumpy_mg, fwhm_unumpy_mg)
 
 bhm_n = unumpy.nominal_values(bhm_err)
 bhm_std = unumpy.std_devs(bhm_err)
 
-C4_L_values = unumpy.nominal_values(C4_L.value)
-C4_L_std = unumpy.std_devs(C4_L.value)
+C4_L_values = unumpy.nominal_values(lum_unumpy)
+C4_L_std = unumpy.std_devs(lum_unumpy_mg)
 
 fwhm_unp = unumpy.nominal_values(fwhm_unumpy)
 fwhm_std = unumpy.std_devs(fwhm_unumpy)
@@ -183,17 +189,6 @@ fwhm_std = unumpy.std_devs(fwhm_unumpy)
 line_shift = (1550 - mu)
 mg_line_shift = (2200 - mu_mg)
 
-fig, ax = plt.subplots()
-
-ax.errorbar(bhm_n, C4_L_values, xerr = bhm_std, yerr = C4_L_std, fmt = 'o')
-ax.set_ylabel('Luminosity w/ Error (erg/s)')
-ax.set_xlabel('Black Hole Mass w/ Error (Solar Masses)')
-ax.set_title('Luminiosity vs. Black Hole Mass')
-ax.set_yscale('log')
-ax.set_xscale('log')
-plt.show()
-
-#
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate']
 #       'Black Hole Mass Using CIV (Solar Mass)', 'Black Hole Mass Using CIV Error',
 #       'Luminosity Using CIV (ergs/s)', 'Luminosity Using CIV Error',
@@ -203,12 +198,12 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate']
 #       'Full Width Half Max Using MgII (km/s)', 'Full Width Half Max Using MgII Error'
 #       'Line Shift of CIV (km/s)', 'Line Shift of MgII (km/s)']
 #
-error_list = [name, mjd, fiberid, plate]
+
+error_list = np.asarray([name, mjd, fiberid, plate]).T
 #              bhm_n, bhm_std,
 #              C4_L_values, C4_L_std,
 #              fwhm_unp, fwhm_std]
 #
-#data_frame = pd.DataFrame(data = error_list, columns = hdr, dtype = str)
-#data_frame.to_csv('error_list.csv', index = False)
 
-#make sure to track the units!
+data_frame = pd.DataFrame(data = error_list, columns = hdr, dtype = str)
+data_frame.to_csv('error_list.csv', index = False)
