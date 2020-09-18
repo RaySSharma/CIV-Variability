@@ -39,16 +39,10 @@ def gauss_fit(quasar, full_wav, c4_wav, c4_flux, full_ivar, mg2_wav, mg2_flux):
     mg2_prior = (mg2_cen, mg2_width, 1)
     mg2_bounds = [[mg2_min, 0, 0], [mg2_max, 5000, 1000]]
     mg2_fit, mg2_cov = curve_fit(gaussian, mg2_wav, mg2_flux, p0 = mg2_prior, bounds = mg2_bounds, sigma = mg2_std, max_nfev=1e3)
-    plt.plot(mg2_wav, mg2_flux, 'C0-')
-    plt.plot(mg2_wav, gaussian(mg2_wav, *mg2_prior), 'C1-')
-    plt.plot(mg2_wav, gaussian(mg2_wav, *mg2_fit), 'C2-')
 
     c4_width = 5e3  # km/s
     c4_prior = (c4_cen, c4_width, 1, c4_width/2, 1, c4_width/4, 1)
     c4_bounds = [[c4_min, 0, 0, 0, 0, 0, 0], [c4_max, 5e5, 1000, 5e5, 1000, 5e5, 1000]]
     c4_fit, c4_cov = curve_fit(gaussian3, c4_wav, c4_flux, p0 = c4_prior, bounds = c4_bounds, sigma = c4_std, max_nfev=1e3) 
-    plt.plot(c4_wav, c4_flux, 'C0-')
-    plt.plot(c4_wav, gaussian3(c4_wav, *c4_prior), 'C1-')
-    plt.plot(c4_wav, gaussian3(c4_wav, *c4_fit), 'C2-')
     return mg2_fit, np.diag(mg2_cov), c4_fit, np.diag(c4_cov)
 
