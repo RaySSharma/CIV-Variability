@@ -6,24 +6,15 @@ Created on Thu Jun 25 14:53:09 2020
 @author: RachelCampo
 """
 import numpy as np
-from astropy.io import fits
 import matplotlib.pyplot as plt
-import scipy.integrate as spi
 from uncertainties import unumpy
-import uncertainties
 import pandas as pd
-import Analysis2
-import Gaussians
 from astropy import units as u
-from scipy.optimize import curve_fit
 from astropy.cosmology import Planck15 as p15
 import astropy.constants as const
 from scipy.interpolate import UnivariateSpline
-import pdb
 
-#for the error, you need to calculate lum, fwhm, a, b.
 c = 3 * 10 ** 5
-lum, fwhm, bhm = Analysis2.analysis()
 final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/final_list.csv', sep = ',', index_col = False)
 Q = len(final_list)
 
@@ -172,19 +163,30 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
 
 bhm_err = mass_bh(C4_L.value, fwhm_unumpy) #bhm_err
 bhm_err_mg = mass_bh(Mg_L.value, fwhm_unumpy_mg)
-print(bhm_err_mg)
 
+#bhm nominal/std values
 bhm_n = unumpy.nominal_values(bhm_err)
 bhm_std = unumpy.std_devs(bhm_err)
 
+mgbhm_n = unumpy.nominal_values(bhm_err_mg)
+mgbhm_std = unumpy.std_devs(bhm_err_mg)
+
+#lum nominal/std values
 C4_L_values = unumpy.nominal_values(C4_L.value)
 C4_L_std = unumpy.std_devs(C4_L.value)
 
+Mg_L_values = unumpy.nominal_values(Mg_L.value)
+Mg_L_std = unumpy.std_devs(Mg_L.value)
+
+#fwhm nominal/std values
 fwhm_unp = unumpy.nominal_values(fwhm_unumpy)
 fwhm_std = unumpy.std_devs(fwhm_unumpy)
 
+mgfwhm_unp = unumpy.nominal_values(fwhm_unumpy_mg)
+mgfwhm_std = unumpy.std_devs(fwhm_unumpy_mg)
+
 line_shift = (1550 - mu)
-mg_line_shift = (2200 - mu_mg)
+mg_line_shift = (2800 - mu_mg)
 
 fig, ax = plt.subplots()
 
@@ -197,21 +199,23 @@ ax.set_xscale('log')
 plt.show()
 
 #
-#hdr = ['Name', 'MJD', 'Fiber ID', 'Plate']
-#       'Black Hole Mass Using CIV (Solar Mass)', 'Black Hole Mass Using CIV Error',
-#       'Luminosity Using CIV (ergs/s)', 'Luminosity Using CIV Error',
-#       'Full Width Half Max Using CIV (km/s)', 'Full Width Half Max Using CIV Error']
-#       'Black Hole Mass Using MgII (Solar Mass)', 'Black Hole Mass Using MgII Error',
-#       'Luminosity Using MgII (erg/s)', 'Luminosity Using MgII Error',
-#       'Full Width Half Max Using MgII (km/s)', 'Full Width Half Max Using MgII Error'
-#       'Line Shift of CIV (km/s)', 'Line Shift of MgII (km/s)']
-#
-#error_list = [name, mjd, fiberid, plate]
-#              bhm_n, bhm_std,
-#              C4_L_values, C4_L_std,
-#              fwhm_unp, fwhm_std]
-#
-#data_frame = pd.DataFrame(data = error_list, columns = hdr, dtype = str)
-#data_frame.to_csv('error_list.csv', index = False)
+hdr = ['Name', 'MJD', 'Fiber ID', 'Plate',
+       'Black Hole Mass Using CIV (Solar Mass)', 'Black Hole Mass Using CIV Error',
+       'Luminosity Using CIV (ergs/s)', 'Luminosity Using CIV Error',
+       'Full Width Half Max Using CIV (km/s)', 'Full Width Half Max Using CIV Error',
+       'Black Hole Mass Using MgII (Solar Mass)', 'Black Hole Mass Using MgII Error',
+       'Luminosity Using MgII (erg/s)', 'Luminosity Using MgII Error',
+       'Full Width Half Max Using MgII (km/s)', 'Full Width Half Max Using MgII Error',
+       'Line Shift of CIV (km/s)', 'Line Shift of MgII (km/s)']
 
-#make sure to track the units!
+error_list = np.asarray([name, mjd, fiberid, plate,
+              bhm_n, bhm_std,
+              C4_L_values, C4_L_std,
+              fwhm_unp, fwhm_std,
+              mgbhm_n, mgbhm_std,
+              Mg_L_values, Mg_L_std,
+              mgfwhm_unp, mgfwhm_std,
+              line_shift, mg_line_shift]).T
+
+data_frame = pd.DataFrame(data = error_list, columns = hdr, dtype = str)
+data_frame.to_csv('error_list.csv', index = False)
