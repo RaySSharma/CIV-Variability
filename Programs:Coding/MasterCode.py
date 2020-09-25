@@ -23,8 +23,7 @@ final_list = []
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'EBV',
                'CIV Value of A from FE Subtraction', 'Error of CIV A', 'CIV Value of k from FE Subtraction', 
-               'Error of CIV K', 'CIV Value of B from FE Subtraction', 'Error of CIV B', 'CIV Value of Mu from FE Subtraction',
-               'Error of CIV Mu', 'CIV Value of Sigma from FE Subtraction', 'Error of CIV Sigma', 'MgII Value of A from FE Subtraction',
+               'Error of CIV K', 'MgII Value of A from FE Subtraction',
                'Error of MgII A', 'MgII Value of k from FE Subtraction', 'Error of MgII k', 'MgII Value of B from FE Subtraction', 'Error of MgII B',
                'MgII Value of Mu from FE Subtraction', 'Error of MgII Mu', 'MgII Value of Sigma from Fe Subtraction', 'Error of MgII Sigma',
                'MgII Mu Value from Gaussian Fitting', 'Error of MgII Mu from Gaussian Fitting',
@@ -78,12 +77,6 @@ for filename in tqdm.tqdm(spectra):
     A_err = C4pcov[0]
     k = C4pf[1]
     k_err = C4pcov[1]
-    B = C4pf[2]
-    B_err = C4pcov[2]
-    mu = C4pf[3]
-    mu_err = C4pcov[3]
-    sigma = C4pf[4]
-    sigma_err = C4pcov[4]
     #pulling out each number from the diagonal from Fe pcov
     #make sure to change to the pf values, not the pcov values!! pcov are the variances
     
@@ -124,7 +117,7 @@ for filename in tqdm.tqdm(spectra):
     
     final_list.append([quasar[2].data['THING_ID'], quasar[2].data['MJD'], 
                        quasar[2].data['FIBERID'], quasar[2].data['PLATE'], z, ebv, 
-                       A, A_err, k, k_err, B, B_err, mu, mu_err, sigma, sigma_err, 
+                       A, A_err, k, k_err, 
                        A_mg, A_mg_err, k_mg, k_mg_err, B_mg, B_mg_err, mu_mg, mu_mg_err,
                        sigma_mg, sigma_mg_err, MgII_mu, MgII_mu_err, MgII_sigma, 
                        MgII_sigma_err, MgII_k, MgII_k_err,
