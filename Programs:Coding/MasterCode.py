@@ -14,17 +14,16 @@ import FESubtraction
 import Gaussians2
 import glob
 import pandas as pd
+import tqdm
 
-#quasar_list = [fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0180.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0105.fits'),
-#                fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0106.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0109.fits'), 
-#                fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0112.fits'), fits.open('/Users/RachelCampo/Desktop/Research/Data/Official Data/spec-5202-55824-0152.fits')]
-quasar_list = glob.glob('data2/rlc186/QuasarData/spec-*')
+spectra_dir = '/data2/rlc186/QuasarData/'
+spectra = ['spec-5202-55824-0105', 'spec-5202-55824-0106', 'spec-5202-55824-0112', 'spec-5202-55824-0115', 'spec-5202-55824-0118', 'spec-5202-55824-0152', 'spec-5202-55824-0180', 'spec-5202-55824-0194', 'spec-5202-55824-0224', 'spec-5202-55824-0295', 'spec-5202-55824-0308', 'spec-5202-55824-0338', 'spec-5202-55824-0340', 'spec-7128-56567-0120', 'spec-7128-56567-0171', 'spec-7128-56567-0178', 'spec-7128-56567-0270']
 final_list = []
+
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'EBV',
                'CIV Value of A from FE Subtraction', 'Error of CIV A', 'CIV Value of k from FE Subtraction', 
-               'Error of CIV K', 'CIV Value of B from FE Subtraction', 'Error of CIV B', 'CIV Value of Mu from FE Subtraction',
-               'Error of CIV Mu', 'CIV Value of Sigma from FE Subtraction', 'Error of CIV Sigma', 'MgII Value of A from FE Subtraction',
+               'Error of CIV K', 'MgII Value of A from FE Subtraction',
                'Error of MgII A', 'MgII Value of k from FE Subtraction', 'Error of MgII k', 'MgII Value of B from FE Subtraction', 'Error of MgII B',
                'MgII Value of Mu from FE Subtraction', 'Error of MgII Mu', 'MgII Value of Sigma from Fe Subtraction', 'Error of MgII Sigma',
                'MgII Mu Value from Gaussian Fitting', 'Error of MgII Mu from Gaussian Fitting',
@@ -38,13 +37,36 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'CIV Sigma 3 Value from Gaussian Fitting', 'Error of CIV Sigma 3 from Gaussian Fitting',
                'CIV K3 Value from Gaussian Fitting', 'Error of CIV K3 from Gaussian Fitting']
 
-for i in quasar_list:
+def get_safe_pixels(mask, ivar):
+    import numpy as np
+    NOPLUG = mask & 2**0
+    BADTRACE = mask & 2**1
+    BADFLAT = mask & 2**2
+    BADARC = mask & 2**3
+    MANYBADCOLUMNS = mask & 2**4
+    MANYREJECTED = mask & 2**5
+    NEARBADPIXEL = mask & 2**16
+    LOWFLAT = mask & 2**17
+    FULLREJECT = mask & 2**18
+    SCATTEREDLIGHT = mask & 2**20
+    NOSKY = mask & 2**22
+    BRIGHTSKY = mask & 2**23
+    COMBINERJ = mask & 2**25
+    REDMONSTER = mask & 2**28
     
-    quasar = fits.open(i)
+    block = (NOPLUG + BADTRACE + BADFLAT + BADARC + MANYBADCOLUMNS + MANYREJECTED + NEARBADPIXEL + LOWFLAT + FULLREJECT + SCATTEREDLIGHT + NOSKY + BRIGHTSKY + COMBINERJ + REDMONSTER)
+
+    safe_pixels = (block == 0) & (ivar > 0)
+    return safe_pixels
+
+for filename in tqdm.tqdm(spectra):
     
-    wavelength = 10**quasar[1].data['loglam']
-    flux = quasar[1].data['flux']
-    var = quasar[1].data['ivar']
+    quasar = fits.open(spectra_dir + filename)
+    
+    safe_pixels = get_safe_pixels(quasar[1].data['and_mask'], quasar[1].data['ivar'])
+    wavelength = 10**quasar[1].data['loglam'][safe_pixels]
+    flux = quasar[1].data['flux'][safe_pixels]
+    ivar = quasar[1].data['ivar'][safe_pixels]
     z = quasar[2].data['Z']
     #starting to go through each code and extracting the properties from it.
     try:
@@ -54,33 +76,30 @@ for i in quasar_list:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
               quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
               ' has failed the Dust Correction Code')
+        continue
     
     try:
-        C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
+        C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(wavelength, extinguished_flux, z, ivar) # returns
     #wavelength, flux, pf, diagonal pcov
     except:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
               quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
               ' has failed the Iron Subtraction Code')
+        continue
         
     try:    
-        mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, extinguished_flux, C4_wav, C4_flux, var, MgII_wav, MgII_flux) # this returns the fits
+        mg2gauss, mg2pcov, c4gauss, c4pcov  = Gaussians2.gauss_fit(quasar, wavelength, C4_wav, C4_flux, ivar, MgII_wav, MgII_flux) # this returns the fits
     #for both the MgII gaussian and the C4 gaussian along with respective diagonal pcov.
     except:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
               quasar[2].data['FIBERID'] + quasar[2].data['PLATE']) + 
               ' has failed the Gaussian Fitting Code')
+        continue
     
     A = C4pf[0]
     A_err = C4pcov[0]
     k = C4pf[1]
     k_err = C4pcov[1]
-    B = C4pf[2]
-    B_err = C4pcov[2]
-    mu = C4pf[3]
-    mu_err = C4pcov[3]
-    sigma = C4pf[4]
-    sigma_err = C4pcov[4]
     #pulling out each number from the diagonal from Fe pcov
     #make sure to change to the pf values, not the pcov values!! pcov are the variances
     
@@ -121,7 +140,7 @@ for i in quasar_list:
     
     final_list.append([quasar[2].data['THING_ID'], quasar[2].data['MJD'], 
                        quasar[2].data['FIBERID'], quasar[2].data['PLATE'], z, ebv, 
-                       A, A_err, k, k_err, B, B_err, mu, mu_err, sigma, sigma_err, 
+                       A, A_err, k, k_err, 
                        A_mg, A_mg_err, k_mg, k_mg_err, B_mg, B_mg_err, mu_mg, mu_mg_err,
                        sigma_mg, sigma_mg_err, MgII_mu, MgII_mu_err, MgII_sigma, 
                        MgII_sigma_err, MgII_k, MgII_k_err,
