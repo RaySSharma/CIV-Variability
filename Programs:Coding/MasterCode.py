@@ -79,7 +79,7 @@ for filename in tqdm.tqdm(spectra):
         continue
     
     try:
-        C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(quasar, wavelength, extinguished_flux) # returns
+        C4_wav, C4_flux, C4pf, C4pcov, MgII_wav, MgII_flux, MgIIpf, MgIIpcov = FESubtraction.FE_sub(wavelength, extinguished_flux, z, ivar) # returns
     #wavelength, flux, pf, diagonal pcov
     except:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +

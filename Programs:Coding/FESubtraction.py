@@ -14,17 +14,15 @@ import pandas as pd
 from scipy.interpolate import InterpolatedUnivariateSpline, interp1d
 from scipy.optimize import curve_fit
 
-def FE_sub(x, lam, f):
+def FE_sub(lam, f, redshift, ivar):
 
-    test_data = x
     FE_Template = pd.read_csv('../Fe_UVtemplt_A.dat', delim_whitespace = True)
 
     #properties from quasar
     wavelength = lam
-    redshift = test_data[2].data['Z']
     flux_rf = f #no need to worry about rf the flux
     wavelength_rf = (wavelength) / (1 + redshift)
-    ivar = 1 / test_data[1].data['ivar']
+    var = 1 / ivar
 
     #properties from iron template
     FE_wavelength = FE_Template['wavelength'].values
@@ -34,15 +32,15 @@ def FE_sub(x, lam, f):
     C4_bounds = (wavelength_rf > 1445) & (wavelength_rf < 1705)
     C4_flux = flux_rf[C4_bounds]
     C4_wavelength = wavelength_rf[C4_bounds]
-    C4_ivar = ivar[C4_bounds]
-    sigma = np.sqrt(abs(C4_ivar))
+    C4_var = var[C4_bounds]
+    sigma = np.sqrt(abs(C4_var))
     
     #MgII properties
     MgII_bounds = (wavelength_rf > 2200) & (wavelength_rf < 3090)
     MgII_flux = flux_rf[MgII_bounds]
     MgII_wavelength = wavelength_rf[MgII_bounds]
-    MgII_ivar = ivar[MgII_bounds]
-    MgII_sigma = np.sqrt(abs(MgII_ivar))
+    MgII_var = var[MgII_bounds]
+    MgII_sigma = np.sqrt(abs(MgII_var))
 
 
     #the three parameters for the widening of the iron plate, rebinning, and fitting
