@@ -37,13 +37,36 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
                'CIV Sigma 3 Value from Gaussian Fitting', 'Error of CIV Sigma 3 from Gaussian Fitting',
                'CIV K3 Value from Gaussian Fitting', 'Error of CIV K3 from Gaussian Fitting']
 
+def get_safe_pixels(mask, ivar):
+    import numpy as np
+    NOPLUG = mask & 2**0
+    BADTRACE = mask & 2**1
+    BADFLAT = mask & 2**2
+    BADARC = mask & 2**3
+    MANYBADCOLUMNS = mask & 2**4
+    MANYREJECTED = mask & 2**5
+    NEARBADPIXEL = mask & 2**16
+    LOWFLAT = mask & 2**17
+    FULLREJECT = mask & 2**18
+    SCATTEREDLIGHT = mask & 2**20
+    NOSKY = mask & 2**22
+    BRIGHTSKY = mask & 2**23
+    COMBINERJ = mask & 2**25
+    REDMONSTER = mask & 2**28
+    
+    block = (NOPLUG + BADTRACE + BADFLAT + BADARC + MANYBADCOLUMNS + MANYREJECTED + NEARBADPIXEL + LOWFLAT + FULLREJECT + SCATTEREDLIGHT + NOSKY + BRIGHTSKY + COMBINERJ + REDMONSTER)
+
+    safe_pixels = (block == 0) & (ivar > 0)
+    return safe_pixels
+
 for filename in tqdm.tqdm(spectra):
     
     quasar = fits.open(spectra_dir + filename)
     
-    wavelength = 10**quasar[1].data['loglam']
-    flux = quasar[1].data['flux']
-    ivar = quasar[1].data['ivar']
+    safe_pixels = get_safe_pixels(quasar[1].data['and_mask'], quasar[1].data['ivar'])
+    wavelength = 10**quasar[1].data['loglam'][safe_pixels]
+    flux = quasar[1].data['flux'][safe_pixels]
+    ivar = quasar[1].data['ivar'][safe_pixels]
     z = quasar[2].data['Z']
     #starting to go through each code and extracting the properties from it.
     try:
