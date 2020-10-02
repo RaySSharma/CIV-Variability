@@ -17,7 +17,7 @@ import pandas as pd
 import tqdm
 
 spectra_dir = '/data2/rlc186/QuasarData/'
-spectra = glob.glob('/data2/rlc186/QuasarData/spec-*', ignore_missing_end = True)
+spectra = glob.glob('/data2/rlc186/QuasarData/spec-*')
 final_list = []
 
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
@@ -61,7 +61,7 @@ def get_safe_pixels(mask, ivar):
 
 for i in spectra:
     
-    quasar = fits.open(i)
+    quasar = fits.open(i, ignore_missing_end = True)
     
     safe_pixels = get_safe_pixels(quasar[1].data['and_mask'], quasar[1].data['ivar'])
     wavelength = 10**quasar[1].data['loglam'][safe_pixels]
