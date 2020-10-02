@@ -151,5 +151,7 @@ for filename in tqdm.tqdm(spectra):
     
     quasar.close()
 
+
 data_frame = pd.DataFrame(final_list, columns = hdr, dtype = float)
+
 data_frame.to_csv('final_list.csv', index = False)
