@@ -17,7 +17,7 @@ import pandas as pd
 import tqdm
 
 spectra_dir = '/data2/rlc186/QuasarData/'
-spectra = glob.glob('/data2/rlc186/QuasarData/spec-*')
+spectra = glob.glob('/data2/rlc186/QuasarData/spec-*', ignore_missing_end = True)
 final_list = []
 
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate', 'Redshift',
