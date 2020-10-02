@@ -62,7 +62,7 @@ def get_safe_pixels(mask, ivar):
 for i in spectra:
     
     try:
-    quasar = fits.open(i, ignore_missing_end = True)
+      quasar = fits.open(i)
     except:
       print('Quasar was unable to open')
       continue
