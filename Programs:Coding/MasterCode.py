@@ -59,9 +59,9 @@ def get_safe_pixels(mask, ivar):
     safe_pixels = (block == 0) & (ivar > 0)
     return safe_pixels
 
-for filename in tqdm.tqdm(spectra):
+for i in spectra:
     
-    quasar = fits.open(spectra_dir + filename)
+    quasar = fits.open(i)
     
     safe_pixels = get_safe_pixels(quasar[1].data['and_mask'], quasar[1].data['ivar'])
     wavelength = 10**quasar[1].data['loglam'][safe_pixels]
