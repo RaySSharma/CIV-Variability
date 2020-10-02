@@ -61,7 +61,11 @@ def get_safe_pixels(mask, ivar):
 
 for i in spectra:
     
+    try:
     quasar = fits.open(i, ignore_missing_end = True)
+    except:
+      print('Quasar was unable to open')
+      continue
     
     safe_pixels = get_safe_pixels(quasar[1].data['and_mask'], quasar[1].data['ivar'])
     wavelength = 10**quasar[1].data['loglam'][safe_pixels]
