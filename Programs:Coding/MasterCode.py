@@ -59,7 +59,7 @@ def get_safe_pixels(mask, ivar):
     safe_pixels = (block == 0) & (ivar > 0)
     return safe_pixels
 
-for i in spectra:
+for i in tqdm.tqdm(spectra):
     
     try:
       quasar = fits.open(i)
