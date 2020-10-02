@@ -149,7 +149,7 @@ for filename in tqdm.tqdm(spectra):
                        CIV_sig3, CIV_sig3_err, CIV_k3, CIV_k3_err])
 
     
-    data_frame = pd.DataFrame(final_list, columns = hdr, dtype = float)
     quasar.close()
 
+data_frame = pd.DataFrame(final_list, columns = hdr, dtype = float)
 data_frame.to_csv('final_list.csv', index = False)
