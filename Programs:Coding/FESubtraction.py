@@ -16,7 +16,7 @@ from scipy.optimize import curve_fit
 
 def FE_sub(lam, f, redshift, ivar):
 
-    FE_Template = pd.read_csv('../Fe_UVtemplt_A.dat', delim_whitespace = True)
+    FE_Template = pd.read_csv('/data2/rlc186/QuasarData/Fe_UVtemplt_A.dat', delim_whitespace = True)
 
     #properties from quasar
     wavelength = lam
