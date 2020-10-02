@@ -5,7 +5,8 @@ Created on Thu Feb 13 11:28:37 2020
 
 @author: RachelCampo
 """
-
+import dustmaps.sfd
+dusmaps.sfd.fetch()
 from astropy.io import fits
 import matplotlib.pyplot as plt
 from dustmaps.sfd import SFDQuery
