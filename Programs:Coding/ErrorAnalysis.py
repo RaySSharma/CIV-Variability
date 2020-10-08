@@ -16,7 +16,7 @@ from scipy.interpolate import UnivariateSpline
 
 c = 3 * 10 ** 5
 
-final_list = pd.read_csv('/Users/RachelCampo/Desktop/Research/CIV-Variability/Programs/final_list.csv', sep = ',', index_col = False)
+final_list = pd.read_csv('/data2/rlc186/QuasarData/CIV-Variability/Programs:Coding/final_list.csv', sep = ',', index_col = False)
 
 Q = len(final_list)
 
@@ -210,18 +210,25 @@ mgfwhm_unp = unumpy.nominal_values(fwhm_unumpy_mg)
 mgfwhm_std = unumpy.std_devs(fwhm_unumpy_mg)
 
 line_shift = (1550 - mu)
+civ_lineshift = unumpy.uarray(line_shift, mu_err)
+c4_line_nom = unumpy.nominal_values(civ_lineshift)
+c4_line_std = unumpy.std_devs(c4_lineshift)
+
 mg_line_shift = (2800 - mu_mg)
+mg_lineshift = unumpy.uarray(mg_line_shift, mu_mg2_er)
+mg_line_nom = unumpy.nominal_values(mg_lineshift)
+mg_line_std = unumpy.std_devs(mg_lineshift)
 
 
-fig, ax = plt.subplots()
+#fig, ax = plt.subplots()
 
-ax.errorbar(bhm_n, C4_L_values, xerr = bhm_std, yerr = C4_L_std, fmt = 'o')
-ax.set_ylabel('Luminosity w/ Error (erg/s)')
-ax.set_xlabel('Black Hole Mass w/ Error (Solar Masses)')
-ax.set_title('Luminiosity vs. Black Hole Mass')
-ax.set_yscale('log')
-ax.set_xscale('log')
-plt.show()
+#ax.errorbar(bhm_n, C4_L_values, xerr = bhm_std, yerr = C4_L_std, fmt = 'o')
+#ax.set_ylabel('Luminosity w/ Error (erg/s)')
+#ax.set_xlabel('Black Hole Mass w/ Error (Solar Masses)')
+#ax.set_title('Luminiosity vs. Black Hole Mass')
+#ax.set_yscale('log')
+#ax.set_xscale('log')
+#plt.show()
 
 #
 hdr = ['Name', 'MJD', 'Fiber ID', 'Plate',
@@ -231,7 +238,8 @@ hdr = ['Name', 'MJD', 'Fiber ID', 'Plate',
        'Black Hole Mass Using MgII (Solar Mass)', 'Black Hole Mass Using MgII Error',
        'Luminosity Using MgII (erg/s)', 'Luminosity Using MgII Error',
        'Full Width Half Max Using MgII (km/s)', 'Full Width Half Max Using MgII Error',
-       'Line Shift of CIV (km/s)', 'Line Shift of MgII (km/s)']
+       'Line Shift of CIV (km/s)', 'Error of CIV Line Shift',
+       'Line Shift of MgII (km/s)', 'Error of MgII Line Shift']
 
 error_list = np.asarray([name, mjd, fiberid, plate,
               bhm_n, bhm_std,
@@ -240,7 +248,8 @@ error_list = np.asarray([name, mjd, fiberid, plate,
               mgbhm_n, mgbhm_std,
               Mg_L_values, Mg_L_std,
               mgfwhm_unp, mgfwhm_std,
-              line_shift, mg_line_shift]).T
+              c4_line_nom, c4_line_std, 
+              mg_line_nom, mg_line_std]).T
 
 data_frame = pd.DataFrame(data = error_list, columns = hdr, dtype = str)
 data_frame.to_csv('error_list.csv', index = False)
