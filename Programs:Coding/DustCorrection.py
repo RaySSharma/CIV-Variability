@@ -9,12 +9,11 @@ import dustmaps.sfd
 dustmaps.sfd.fetch()
 from astropy.io import fits
 import matplotlib.pyplot as plt
-from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord as SC
 from astropy import units as u
 from dust_extinction.parameter_averages import F99
 
-def dust_cor(x, lam, f):
+def dust_cor(x, lam, f, SFD):
 
     test_quasar = x
 
@@ -25,7 +24,7 @@ def dust_cor(x, lam, f):
 
     coordinates = SC(RA, Dec, frame = 'icrs', unit = u.deg)
 
-    sfd = SFDQuery()
+    sfd = SFD
     ebv = sfd(coordinates)
     R_v = 3.1
 
