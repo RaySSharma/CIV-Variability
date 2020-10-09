@@ -15,6 +15,8 @@ import Gaussians2
 import glob
 import pandas as pd
 import tqdm
+from dustmaps.sfd import SFDQuery
+sfd = SFDQuery()
 
 spectra_dir = '/data2/rlc186/QuasarData/'
 spectra = glob.glob('/data2/rlc186/QuasarData/spec-*')
@@ -74,7 +76,7 @@ for i in tqdm.tqdm(spectra):
     z = quasar[2].data['Z']
     #starting to go through each code and extracting the properties from it.
     try:
-        extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux) #returns extinguished 
+        extinguished_flux, ebv = DustCorrection.dust_cor(quasar, wavelength, flux, sfd) #returns extinguished 
     #flux and ebv
     except:
         print('Quasar ' + str(quasar[2].data['THING_ID'] + quasar[2].data['MJD'] +
