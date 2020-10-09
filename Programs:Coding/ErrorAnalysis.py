@@ -199,8 +199,8 @@ mgbhm_n = unumpy.nominal_values(bhm_err_mg)
 mgbhm_std = unumpy.std_devs(bhm_err_mg)
 
 
-Mg_L_values = unumpy.nominal_values(Mg_L.value)
-Mg_L_std = unumpy.std_devs(Mg_L.value)
+Mg_L_values = unumpy.nominal_values(lum_unumpy_mg)
+Mg_L_std = unumpy.std_devs(lum_unumpy_mg)
 
 #fwhm nominal/std values
 fwhm_unp = unumpy.nominal_values(fwhm_unumpy)
