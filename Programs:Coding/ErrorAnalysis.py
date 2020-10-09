@@ -212,7 +212,7 @@ mgfwhm_std = unumpy.std_devs(fwhm_unumpy_mg)
 line_shift = (1550 - mu)
 civ_lineshift = unumpy.uarray(line_shift, mu_err)
 c4_line_nom = unumpy.nominal_values(civ_lineshift)
-c4_line_std = unumpy.std_devs(c4_lineshift)
+c4_line_std = unumpy.std_devs(civ_lineshift)
 
 mg_line_shift = (2800 - mu_mg)
 mg_lineshift = unumpy.uarray(mg_line_shift, mu_mg2_er)
