@@ -10,8 +10,7 @@ import numpy as np
 from astropy.io import fits
 from scipy.optimize import curve_fit
 
-def gauss_fit(quasar, full_wav, c4_wav, c4_flux, full_ivar, mg2_wav, mg2_flux):
-    redshift = quasar[2].data['Z']
+def gauss_fit(redshift, full_wav, c4_wav, c4_flux, full_ivar, mg2_wav, mg2_flux):
     full_wav_rf = full_wav / (1 + redshift)
     c = 3 * 10**5
     mg2_min, mg2_max, mg2_cen = 2700, 2900, 2798

@@ -13,12 +13,7 @@ from astropy.coordinates import SkyCoord as SC
 from astropy import units as u
 from dust_extinction.parameter_averages import F99
 
-def dust_cor(x, lam, f, SFD):
-
-    test_quasar = x
-
-    RA = test_quasar[2].data['PLUG_RA']
-    Dec = test_quasar[2].data['PLUG_DEC']
+def dust_cor(RA, Dec, lam, f, SFD):
     wavelength = lam
     flux = f
 
