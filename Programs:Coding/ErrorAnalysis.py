@@ -138,7 +138,7 @@ fwhm_unumpy_mg = unumpy.uarray(mg_mean_list, mg_std_list)
 #finding black hole mass error:
 def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
     mbh = unumpy.uarray(np.zeros(len(lum)), np.zeros(len(lum)))
-    successful = unumpy.nominal_values(lum)&unumpy.nominal_values(fwhm) > 0
+    successful = (unumpy.nominal_values(lum))&(unumpy.nominal_values(fwhm)) > 0
     mbh[successful] = 10 ** (a + b * unumpy.log10(lum[successful] / 1e44)
                   + 2 * unumpy.log10(fwhm[successful]))
     return mbh
