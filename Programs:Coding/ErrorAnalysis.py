@@ -50,7 +50,7 @@ Mg_wav = np.linspace(2750, 2850, 1000)
 d = p15.luminosity_distance(redshift).to('cm').value
 
 def FWHM(x, y, center):
-    y_hm = y - y.max(axis=1)/2
+    y_hm = y.max(axis=1)/2
     hm_ix = abs(y - y_hm).argmin(axis=1)
     fwhm = 2*abs(center - x[hm_ix])
     return A_to_kms(fwhm, center)
