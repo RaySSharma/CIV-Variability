@@ -144,7 +144,6 @@ def mass_bh(lum, fwhm, a = 0.660, b = 0.53):
                   + 2 * unumpy.log10(fwhm[successful]))
     except:
         print('Runtime Error in the FWHM, no number printed')
-        continue
     return mbh
 
 
